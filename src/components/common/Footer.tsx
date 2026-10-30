@@ -1,12 +1,16 @@
 import React from 'react';
-import { GithubIcon, LinkedinIcon, MailIcon } from '@/components/icons';
+import { GithubIcon, LinkedinIcon, MailIcon, LockIcon } from '@/components/icons';
 import { profileData } from '@/data/profileData';
+
+export interface FooterProps {
+  onOpenAdmin?: () => void;
+}
 
 /**
  * Footer component displaying brand mark, copyright, and direct social links.
  * All icons rendered strictly as inline SVGs using currentColor.
  */
-export const Footer: React.FC = () => {
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -25,6 +29,17 @@ export const Footer: React.FC = () => {
 
         {/* Social Network Icon Endpoints */}
         <div className="flex items-center gap-3">
+          {onOpenAdmin && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              aria-label="Abrir Painel Administrativo"
+              title="Painel Privado"
+              className="w-11 h-11 rounded-xl bg-brand-deep flex items-center justify-center border border-brand-accent/20 text-brand-text hover:text-brand-accent hover:border-brand-accent transition-all hover:scale-105"
+            >
+              <LockIcon className="w-5 h-5" />
+            </button>
+          )}
           <a
             href={profileData.socials.github}
             target="_blank"
@@ -53,8 +68,19 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      <div className="py-4 text-center text-xs text-brand-textMuted/70 border-t border-white/5">
-        &copy; {currentYear} {profileData.name}. Construído com Clean Architecture, React e Tailwind CSS.
+      <div className="py-4 text-center text-xs text-brand-textMuted/70 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2">
+        <span>
+          &copy; {currentYear} {profileData.name}. Construído com Clean Architecture, React e Tailwind CSS.
+        </span>
+        {onOpenAdmin && (
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            className="text-[11px] font-mono text-brand-accent hover:underline ml-2"
+          >
+            [Painel Privado]
+          </button>
+        )}
       </div>
     </footer>
   );

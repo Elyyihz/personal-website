@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { MailIcon } from '@/components/icons';
+import { MailIcon, LockIcon } from '@/components/icons';
+
+export interface NavbarProps {
+  onOpenAdmin?: () => void;
+}
 
 /**
  * Fixed top navigation bar with blur effect and semantic section anchors.
  */
-export const Navbar: React.FC = () => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -43,8 +47,20 @@ export const Navbar: React.FC = () => {
           ))}
         </div>
 
-        {/* Right CTA Button */}
-        <div className="hidden md:flex items-center">
+        {/* Right CTA and Admin Access Buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          {onOpenAdmin && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              title="Acessar Painel Administrativo Privado"
+              className="p-2 rounded-lg text-brand-textMuted hover:text-brand-accent hover:bg-brand-surface border border-white/5 transition-all"
+              aria-label="Abrir Painel Administrativo"
+            >
+              <LockIcon className="w-4 h-4" />
+            </button>
+          )}
+
           <a
             href="#contato"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-[0_0_15px_rgba(34,211,238,0.15)] hover:shadow-glow-blue"
@@ -99,14 +115,29 @@ export const Navbar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <a
-            href="#contato"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="inline-flex items-center justify-center gap-2 w-full mt-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white transition-all"
-          >
-            <MailIcon className="w-4 h-4 text-currentColor" />
-            <span>Contato</span>
-          </a>
+          <div className="flex gap-2 pt-2">
+            {onOpenAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenAdmin();
+                }}
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-textMuted hover:text-brand-accent bg-brand-deep border border-brand-accent/20 flex items-center justify-center gap-2"
+              >
+                <LockIcon className="w-3.5 h-3.5" />
+                <span>Painel</span>
+              </button>
+            )}
+            <a
+              href="#contato"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white transition-all"
+            >
+              <MailIcon className="w-3.5 h-3.5 text-currentColor" />
+              <span>Contato</span>
+            </a>
+          </div>
         </div>
       )}
     </nav>

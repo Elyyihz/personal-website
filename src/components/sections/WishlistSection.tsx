@@ -7,7 +7,7 @@ import {
   BookOpenIcon,
   ChevronRightIcon,
 } from '@/components/icons';
-import { allWishlistData } from '@/data/wishlistData';
+import { useData } from '@/context/DataContext';
 import type { WishlistCategory, WishlistItem } from '@/types/wishlist';
 
 type CategoryFilter = 'Todos' | WishlistCategory;
@@ -19,6 +19,7 @@ const PAGE_SIZE = 12;
  * Includes interactive category switching, instant title/author search, and pagination.
  */
 export const WishlistSection: React.FC = () => {
+  const { wishlistItems } = useData();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
@@ -29,7 +30,7 @@ export const WishlistSection: React.FC = () => {
    * Evaluates filtered list based on selected category and text search query.
    */
   const filteredItems = useMemo(() => {
-    return allWishlistData.filter((item: WishlistItem) => {
+    return wishlistItems.filter((item: WishlistItem) => {
       const matchesCategory =
         activeCategory === 'Todos' || item.category === activeCategory;
 

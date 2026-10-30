@@ -22,4 +22,7 @@ export interface Project {
 
   /** Whether the project should be highlighted on the main grid banner */
   featured?: boolean;
+
+  /** Key identifier of registered inline SVG icon from local registry */
+  icon?: string;
 }
