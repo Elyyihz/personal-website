@@ -6,6 +6,14 @@ import type { WishlistItem } from '@/types/wishlist';
  */
 export const booksData: WishlistItem[] = [
   {
+    "id": "book-high-castle",
+    "title": "The Man in the High Castle",
+    "subtitle": "Philip K. Dick",
+    "category": "Livros",
+    "url": "https://www.amazon.com.br/s?k=The+Man+in+the+High+Castle+Philip+K.+Dick",
+    "tag": "Ficção Científica"
+  },
+  {
     "id": "book-1",
     "title": "A curandeira de Zalindov",
     "subtitle": "Lynette Noni",
