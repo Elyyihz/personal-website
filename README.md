@@ -1,12 +1,12 @@
 # Site Pessoal & Portfólio — Elynne Lima
 
-Repositório front-end do site pessoal e portfólio profissional de **Elynne Lima** (AI Systems Engineer & Full-Stack Architect). Desenvolvido com **React 18**, **TypeScript**, **Vite** e estilizado com **Tailwind CSS**.
+Ecossistema completo do site pessoal e portfólio profissional de **Elynne Lima** (AI Systems Engineer & Full-Stack Architect). Composto por um frontend reativo moderno em **React 18**, **TypeScript estrito**, **Vite** e **Tailwind CSS**, orquestrado conjuntamente com um microserviço backend em **Python 3.13**, **FastAPI**, **SQLAlchemy** e **PostgreSQL**, estruturado estritamente segundo os princípios de **Clean Architecture**, **Domain-Driven Design (DDD)** e **Test-Driven Development (TDD)**.
 
 ---
 
-## 🎨 Design System
+## 1. Design System
 
-A interface adota um tema escuro imersivo (*deep dark mode*) com contraste refinado e realces em ciano e azul elétrico:
+A interface visual adota um tema escuro imersivo (*deep dark mode*) com contraste refinado e realces em ciano e azul elétrico:
 
 - **Fundo Base (Deep Backdrop):** `slate-950` (`#020617`) para imersão e profundidade.
 - **Superfícies de Cartões (Card Surface):** `slate-900` (`#0f172a`) com cantos arredondados (`rounded-2xl`).
@@ -14,151 +14,203 @@ A interface adota um tema escuro imersivo (*deep dark mode*) com contraste refin
 - **Tipografia e Textos:** Corpo em `slate-300` (`#cbd5e1`), textos secundários em `slate-400` (`#94a3b8`) e títulos em `slate-50` (`#f8fafc`).
 - **Bordas e Destaques:** Acentos em `cyan-400` (`#22d3ee`) e ações primárias em `blue-500` (`#3b82f6`).
 - **Efeitos de Glow:** Sombras difusas `glow-cyan` e `glow-blue` para componentes em foco e cartões interativos.
+- **Diretriz de Assets:** É terminantemente proibido o uso de emojis. Todos os ícones são SVGs inline implementados com a propriedade `currentColor` nos atributos de traçado para herdar cores reativas de hover e estados do Tailwind CSS.
 
 ---
 
-## 🏛️ Estrutura Semântica e Seções
+## 2. Arquitetura do Backend (Clean Architecture & DDD)
 
-O esqueleto da página está organizado nas seguintes seções modulares:
+O microserviço em `backend/` adota isolamento estrito entre camadas concêntricas segundo o diagrama canônico de Robert C. Martin e Eric Evans:
 
-1. **Navegação Fixa (`Navbar`):** Header responsivo com efeito *glassmorphism* (*backdrop-blur*), logotipo estilizado, links de âncoras, atalho de acesso ao Painel Administrativo Privado e menu mobile.
-2. **Hero (`HeroSection`):** Apresentação de boas-vindas com gradiente de texto, síntese da atuação profissional, botões de ação e avatar com aura luminosa.
-3. **Sobre Mim (`AboutMeSection`):** Narrativa biográfica focada em *Clean Architecture*, convergência entre backend e IA, além de grade de atributos pessoais (Localização em Recife, foco em IA & Full-Stack, MBTI ISTP e café).
-4. **O Que Eu Faço (`WhatIDoSection`):** Vitrine de projetos com **grid responsivo de altura uniforme (equal-height)** via utilitários do Tailwind (`auto-rows-fr`, `items-stretch`, `h-full`), flexibilidade estrutural e badges de destaque, integrado dinamicamente ao contexto de dados.
-5. **Consumindo Atualmente (`CurrentlyConsumingSection`):**
-   - **Lendo:** Exibe o livro injetado ***The Man in the High Castle* (Philip K. Dick)** com capa oficial em alta definição, autoria, gênero de ficção científica e link direto de referência para a Amazon.
-   - **Ouvindo (Integração Spotify API & OAuth):** Consome o endpoint seguro de backend/edge `/api/spotify` que renova o token OAuth e consulta dinamicamente a faixa em reprodução (`currently-playing`) ou a última faixa tocada (`recently-played`), com fallback mock para modo offline.
-   - **Assistindo:** Recomendações de ficção científica e mídias visuais.
-6. **O Que Eu Gosto (`InterestsSection`):** Pílulas interativas com afinidades pessoais (Stardew Valley, Pokémon, Paleontologia, Engenharia Biomimética, Ella Enchanted e Cafés Especiais).
-7. **Wishlist Categorizada (`WishlistSection`):** Coleção completa de mais de 160 livros importados da lista da Amazon (incluindo *The Man in the High Castle*), itens de hardware, periféricos e colecionáveis, com busca instantânea em tempo real, abas por categoria e paginação suave.
-8. **Contato (`ContactsSection`):** Canais de comunicação direta com atalhos para envio e cópia de e-mail para a área de transferência, GitHub e LinkedIn.
-9. **Painel Administrativo Privado (`AdminDashboard`):** Interface de controle privada protegida por senha com operações completas de CRUD (Create, Read, Update, Delete) para Projetos, Wishlist e Mídias, integrando o seletor de ícones **`IconPicker`** com registro local de SVGs inline.
-10. **Rodapé (`Footer`):** Informações de autoria, links sociais e atalho discreto para o painel privado.
+```
+                  ┌─────────────────────────────────────┐
+                  │      Apresentação / Frameworks      │
+                  │   (FastAPI Routers, Lifespan, DI)   │
+                  │  ┌───────────────────────────────┐  │
+                  │  │     Infraestrutura Concreta   │  │
+                  │  │  (SQLAlchemy, JWT, Bcrypt)    │  │
+                  │  │  ┌─────────────────────────┐  │  │
+                  │  │  │   Casos de Uso / Aplicação│ │  │
+                  │  │  │  (ProjectUseCases, DTOs)│ │  │
+                  │  │  │  ┌───────────────────┐  │ │  │
+                  │  │  │  │   Domínio Puro    │  │ │  │
+                  │  │  │  │(Entities, Repos)  │  │ │  │
+                  │  │  │  └───────────────────┘  │ │  │
+                  │  │  └─────────────────────────┘  │  │
+                  │  └───────────────────────────────┘  │
+                  └─────────────────────────────────────┘
+```
 
----
+### Ordem de Escrita (de dentro para fora)
 
-## 🔒 Painel Administrativo Privado (Admin Dashboard)
+A Regra de Dependência estipula que camadas internas jamais conhecem detalhes de implementação das camadas externas. Escrever de dentro para fora garante que cada artefato, no momento de sua criação, dependa exclusivamente de tipos já consolidados.
 
-O painel de controle permite gerenciar dinamicamente as entidades sem necessidade de rebuild estático:
-
-- **Autenticação Segura:** Protegido por modal de senha (padrão: `admin` ou `elyyihz`). Pode ser acessado pelo ícone de cadeado na barra de navegação, no rodapé ou pelo atalho de teclado `Ctrl + Shift + A` (`Cmd + Shift + A` no Mac).
-- **CRUD de Projetos:** Criação, edição e exclusão de projetos com título, descrição, tags, URLs de repositório/demo, flag de destaque e seleção visual de ícone via `IconPicker`.
-- **CRUD da Wishlist:** Inclusão, alteração e exclusão de itens de leitura, hardware e colecionáveis, com categorização e URLs diretas da Amazon.
-- **Gerenciador de Mídias:** Edição em tempo real do livro em leitura (*The Man in the High Castle*), recomendações de séries/vídeo e monitoramento do status da API do Spotify.
-- **Icon Picker Component (`IconPicker`):** Seletor interativo de ícones SVG inline que consome um registro local tipado (`ICON_REGISTRY`), categorizado por abas (Tech, Mídia, Ações, Geral), busca por nome e suporte nativo a `currentColor`.
-- **Persistência Local & Reset:** Todas as alterações são salvas no `localStorage` do navegador com opção de um clique para restaurar os dados padrão de fábrica.
-
----
-
-## 🎵 Spotify OAuth & API (Backend / Edge Handler)
-
-A integração de música foi desacoplada em uma rota de backend/edge segura:
-
-- **Segurança de Credenciais:** As chaves secretas (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`) são manipuladas estritamente no lado do servidor e **nunca** expostas no bundle do cliente.
-- **Renovação Automática de Token:** O handler em `server/spotifyHandler.ts` realiza a troca do refresh token com a API de contas do Spotify (`https://accounts.spotify.com/api/token`).
-- **Endpoint Duplo (`currently-playing` + `recently-played`):** Caso o usuário não esteja ouvindo nada no momento (HTTP 204), a API consulta automaticamente o histórico recente (`/v1/me/player/recently-played`) para exibir a última música reproduzida.
-- **Ambiente de Desenvolvimento:** O arquivo `vite.config.ts` inclui um middleware integrado que responde a requisições `GET /api/spotify` localmente durante `npm run dev`.
-- **Ambiente Serverless/Edge:** O arquivo `api/spotify.ts` disponibiliza a função pronta para deploy em provedores serverless (Vercel, Netlify, Cloudflare Workers, Node).
+| Ordem | Camada | Arquivo(s) | Por quê essa ordem |
+|---|---|---|---|
+| 1 | Domínio — Exceções de Domínio | `backend/app/domain/exceptions/domain_exceptions.py` | Não depende de nada; define falhas invariantes de entidades e autenticação. |
+| 2 | Domínio — Entidades (Entities) | `backend/app/domain/entities/project.py`<br>`backend/app/domain/entities/wishlist.py`<br>`backend/app/domain/entities/media.py`<br>`backend/app/domain/entities/hobby.py`<br>`backend/app/domain/entities/admin.py` | Dependem apenas de exceções do domínio e biblioteca padrão (`datetime`); isolam lógica de negócio pura, validações e a flag `is_fulfilled`. |
+| 3 | Domínio — Portas de Repositório (Interfaces) | `backend/app/domain/repositories/interfaces.py` | Contratos abstratos (`typing.Protocol` / ABC) definindo o que o domínio exige para persistência, sem acoplar a bancos. |
+| 4 | Aplicação — DTOs (Data Transfer Objects) | `backend/app/application/dtos/project_dto.py`<br>`backend/app/application/dtos/wishlist_dto.py`<br>`backend/app/application/dtos/media_dto.py`<br>`backend/app/application/dtos/hobby_dto.py`<br>`backend/app/application/dtos/auth_dto.py` | Schemas Pydantic v2 isolando payloads de entrada e saída com `ConfigDict(from_attributes=True)`. |
+| 5 | Aplicação — Casos de Uso (Use Cases) | `backend/app/application/use_cases/project_use_cases.py`<br>`backend/app/application/use_cases/wishlist_use_cases.py`<br>`backend/app/application/use_cases/media_use_cases.py`<br>`backend/app/application/use_cases/hobby_use_cases.py`<br>`backend/app/application/use_cases/auth_use_cases.py` | Orquestram fluxo de negócio manipulando entidades através das portas de repositório; não importam framework HTTP nem ORM. |
+| 6 | Infraestrutura — Segurança & Criptografia | `backend/app/infrastructure/security/password_hasher.py`<br>`backend/app/infrastructure/security/jwt_provider.py` | Implementações de hashing com `bcrypt` e emissão de tokens assinados com `PyJWT`. |
+| 7 | Infraestrutura — Persistência Relacional | `backend/app/infrastructure/database/config.py`<br>`backend/app/infrastructure/database/models.py`<br>`backend/app/infrastructure/repositories/sqlalchemy_repositories.py` | Modelos relacionais SQLAlchemy (com colunas JSON e índices booleano) e repositórios concretos que cumprem as portas da camada 3. |
+| 8 | Apresentação — Injeção de Dependências & Guardas | `backend/app/presentation/dependencies.py` | Monta instâncias dos casos de uso e injeta guarda de autenticação JWT Bearer para rotas protegidas. |
+| 9 | Apresentação — Roteadores HTTP (Controllers) | `backend/app/presentation/routers/auth_router.py`<br>`backend/app/presentation/routers/projects_router.py`<br>`backend/app/presentation/routers/wishlist_router.py`<br>`backend/app/presentation/routers/media_router.py`<br>`backend/app/presentation/routers/hobbies_router.py`<br>`backend/app/presentation/routers/spotify_router.py` | Expõe endpoints RESTful com validação de status HTTP, OpenAPI Swagger e tratamento de erros. |
+| 10 | Apresentação — Aplicação Principal & Lifespan | `backend/app/presentation/main.py` | Inicializa FastAPI, registra middlewares CORS, gerencia ciclo de vida (startup seeding de admin e dados iniciais) e handlers de exceção. |
 
 ---
 
-## 🚫 Diretrizes de Assets e UI (Zero Emojis)
+### Ordem de Leitura (de fora para dentro)
 
-- **Proibição Estrita de Emojis:** É terminantemente proibido o uso de emojis na interface ou marcação.
-- **Ícones em SVG Inline:** Todos os ícones são implementados como componentes React nativos contendo SVGs inline (`src/components/icons/`).
-- **Herança via `currentColor`:** As tags de `<path>`, `<polygon>` e traçados utilizam exclusivamente `currentColor`, permitindo que todas as classes utilitárias de hover e cor do Tailwind CSS funcionem de maneira reativa e sem sobrescritas forçadas.
+O caminho de leitura inverso permite que um desenvolvedor sem conhecimento prévio compreenda a arquitetura partindo do ponto de entrada da requisição até a regra de negócio central:
+
+| Ordem | Pergunta que você está respondendo | Arquivo(s) |
+|---|---|---|
+| 1 | Quais rotas REST existem e quais contratos OpenAPI expõem? | `backend/app/presentation/main.py` → `backend/app/presentation/routers/*.py` |
+| 2 | Como as dependências e o token JWT são injetados nas rotas? | `backend/app/presentation/dependencies.py` |
+| 3 | O que a rota manda executar em termos de regra de negócio? | `backend/app/application/use_cases/*_use_cases.py` |
+| 4 | Com quais contratos e modelos o caso de uso interage? | `backend/app/domain/repositories/interfaces.py` e `backend/app/domain/entities/*.py` |
+| 5 | Como a persistência e a segurança são cumpridas de verdade? | `backend/app/infrastructure/repositories/sqlalchemy_repositories.py` e `backend/app/infrastructure/security/*.py` |
+| 6 | Como exceções de domínio são convertidas para respostas HTTP limpas? | `backend/app/domain/exceptions/domain_exceptions.py` e handlers em `backend/app/presentation/main.py` |
+
+> **Regra de ouro:** Escreve-se de dentro para fora porque o domínio não pode depender de nenhum detalhe externo; lê-se de fora para dentro porque é assim que um engenheiro navega um sistema não familiar até alcançar o núcleo da regra de negócio.
 
 ---
 
-## 📐 Padrões de Código e Engenharia de Software
+## 3. Integração Spotify Web API (OAuth 2.0 & TypeScript Estrito)
 
-- **Idioma do Código:** Todo o código-fonte, variáveis, interfaces, tipos, nomes de componentes e comentários técnicos estão estritamente em **inglês**. A documentação e os commits são mantidos em **português**.
-- **JSDoc Completo:** Tipos, interfaces, classes de serviço e componentes possuem blocos JSDoc detalhando responsabilidades, parâmetros e retornos.
-- **Kent Beck Commenting & Tidies:** Princípio de *Explain Why, Not What*, uso de *Guard Clauses* para eliminação de aninhamentos e remoção de código morto.
-- **Rastreabilidade e Logs:** A classe utilitária `Logger` (`src/utils/logger.ts`) padroniza o ciclo de vida de operações críticas (`logStepStart`, `logDecision`, `logStepConclusion`).
+A reprodução e acompanhamento de faixas musicais opera de forma segura e reativa:
+
+- **Validação Estrita de Ambiente:** `src/config/envValidator.ts` valida em tempo de execução a presença de `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REDIRECT_URI` e `SPOTIFY_REFRESH_TOKEN`.
+- **Fluxo de Autorização e Renovação Automática:**
+  - `GET /api/v1/spotify/login`: Redireciona o usuário para consentimento no Spotify com escopo `user-read-currently-playing`.
+  - `GET /callback` (capturado pelo componente `<SpotifyCallbackHandler />`): Recebe o código de autorização e obtém os tokens de acesso.
+  - `SpotifyOAuthManager` (`src/services/spotifyOAuth.ts`): Realiza o refresh automático do access token em segundo plano caso o token tenha expirado.
+- **Tratamento de Fallback HTTP 204:** Quando nenhuma faixa estiver tocando no reprodutor ou o cliente do Spotify estiver fechado, a aplicação exibe um estado visual de repouso ("Nenhuma faixa tocando no momento") sem gerar erros no console.
+- **Card Minimalista em Tailwind:** `<SpotifyPlayerCard />` renderiza a capa do álbum com glow reativo, barra de progresso em tempo real, artistas vinculados e indicador sonoro em SVG inline.
 
 ---
 
-## 📁 Estrutura de Diretórios
+## 4. Modo Terminal macOS Zsh Interativo
+
+Para demonstrar proficiência em engenharia de sistemas e proporcionar uma experiência interativa aos visitantes, foi desenvolvido um emulador de terminal macOS:
+
+- **Atalho Global:** Pressione `Ctrl + \`` (ou `Cmd + \`` no macOS) ou `Ctrl + Shift + T` para abrir o terminal a qualquer momento.
+- **Acesso pelo Header e Rodapé:** Botão com ícone de terminal presente na `Navbar` e no `Footer`.
+- **Barra de Janela macOS:** Inclui botões vermelho, amarelo e verde (*traffic lights*) e título com prompt `elyyihz — -zsh — 80x24`.
+- **Navegação de Histórico:** Setas para cima (`ArrowUp`) e para baixo (`ArrowDown`) navegam pelo histórico de comandos digitados.
+- **Comandos Suportados:**
+  - `help`: Lista os comandos disponíveis.
+  - `whoami`: Exibe o perfil, stack técnica, localização e MBTI.
+  - `projects`: Lista os principais projetos do portfólio.
+  - `skills`: Exibe frameworks de IA, backend e observabilidade.
+  - `spotify`: Diagnóstico do status da integração Spotify Web API.
+  - `theme`: Detalhes das cores do Design System (Deep Blue & Cyan).
+  - `clear`: Limpa o buffer de tela do terminal.
+  - `sudo`: Elevação simulada de privilégios com confirmação.
+  - `exit`: Fecha a janela do terminal.
+
+---
+
+## 5. Painel de Controle Administrativo (Admin Dashboard)
+
+O painel administrativo privado viabiliza a gestão completa e imediata do conteúdo:
+
+- **Autenticação:** Protegido por modal (`AdminAuthModal`) que autentica via JWT no backend FastAPI ou utiliza fallback seguro em `sessionStorage` (senha: `admin` ou `elyyihz`). Atalho rápido: `Ctrl + Shift + A` (`Cmd + Shift + A`).
+- **CRUD de Projetos:** Criação, edição e exclusão de projetos com tags e seleção de ícone SVG.
+- **CRUD da Wishlist:** Suporte explícito ao booleano `is_fulfilled` (item já adquirido / realizado), alternável via botão de confirmação e refletido com badge visual.
+- **Gestão de Consumo de Mídias:** Atualização da leitura ativa (*The Man in the High Castle* de Philip K. Dick) e mídias visuais.
+- **Gestão de Gostos & Hobbies:** Criação e manutenção de afinidades com **Icon Picker** integrado, selecionando slugs salvos no banco a partir do registro local de SVGs inline.
+
+---
+
+## 6. Como Executar a Aplicação
+
+### Pré-requisitos
+- Node.js 18+ e npm
+- Python 3.11+
+- Docker e Docker Compose (opcional para ambiente conteinerizado)
+
+### Execução via Docker Compose (Microsserviço + PostgreSQL)
+```bash
+# Iniciar banco de dados PostgreSQL 16 e microserviço FastAPI
+docker compose up -d --build
+
+# Verificar logs da aplicação
+docker compose logs -f backend
+```
+
+A documentação interativa Swagger estará acessível em: `http://localhost:8000/docs`.
+
+### Execução Local para Desenvolvimento
+
+#### 1. Backend (FastAPI)
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate   # ou .venv\Scripts\activate no Windows
+pip install -r requirements.txt
+
+# Executar suite de testes com TDD (15 testes unitários e de integração)
+PYTHONPATH=. pytest -v
+
+# Iniciar servidor Uvicorn com hot-reload
+uvicorn app.presentation.main:app --reload --port 8000
+```
+
+#### 2. Frontend (React + Vite)
+```bash
+# Na raiz do repositório:
+npm install
+
+# Compilar TypeScript estrito e validar o build
+npm run build
+
+# Iniciar servidor Vite de desenvolvimento
+npm run dev
+```
+
+Abra o navegador em `http://localhost:5173`.
+
+---
+
+## 7. Estrutura de Diretórios Consolidada
 
 ```
 personal-website/
-├── api/
-│   └── spotify.ts               # Endpoint serverless / edge para Spotify
-├── server/
-│   └── spotifyHandler.ts        # Lógica backend segura de renovação de token OAuth
-├── index.html                   # Ponto de entrada HTML com fontes e viewport
-├── package.json                 # Dependências e scripts do projeto
-├── postcss.config.js            # Configuração do PostCSS para Tailwind
-├── tailwind.config.js           # Paleta de cores brand, tipografia e sombras glow
-├── tsconfig.json                # Configuração estrita do compilador TypeScript
-├── tsconfig.node.json           # Configuração TypeScript para runtime do Vite e server
-├── vite.config.ts               # Bundler Vite com middleware backend e alias path '@/...'
-├── .env.example                 # Modelo de credenciais server-side do Spotify
-├── .gitignore                   # Regras de exclusão do Git
-└── src/
-    ├── App.tsx                  # Componente raiz agregador de seções e modais admin
-    ├── main.tsx                 # Montagem do React no DOM
-    ├── vite-env.d.ts            # Tipagens globais do ambiente Vite
-    ├── context/
-    │   └── DataContext.tsx      # Provedor global com persistência e operações de CRUD
-    ├── components/
-    │   ├── admin/               # Telas do Painel Administrativo Privado
-    │   │   ├── AdminAuthModal.tsx    # Modal de autenticação com senha
-    │   │   ├── AdminDashboard.tsx    # Shell principal do painel de controle
-    │   │   ├── ProjectsManager.tsx   # CRUD de projetos com IconPicker
-    │   │   ├── WishlistManager.tsx   # CRUD da wishlist categorizada
-    │   │   └── MediaManager.tsx      # Gerenciador de leitura e mídia
-    │   ├── common/              # Componentes de layout (Navbar, Footer, IconPicker, Heading)
-    │   ├── icons/               # Biblioteca e registro de ícones SVG inline com currentColor
-    │   └── sections/            # Seções da página principal (Hero, About, Projects, etc.)
-    ├── data/                    # Dados tipados (livros da Amazon, projetos, perfil, mídia)
-    ├── hooks/                   # Custom hooks (useSpotify, etc.)
-    ├── services/                # Serviços de API desacoplados (SpotifyService)
-    ├── styles/                  # Estilos globais e diretivas Tailwind
-    ├── types/                   # Contratos TypeScript (Spotify, Wishlist, Project, Media, Icon)
-    └── utils/                   # Utilitários de logging e telemetria
+├── backend/
+│   ├── app/
+│   │   ├── domain/                  # Entidades, exceções e portas abstratas
+│   │   ├── application/             # DTOs Pydantic v2 e Casos de Uso
+│   │   ├── infrastructure/          # SQLAlchemy, Bcrypt, PyJWT e Banco
+│   │   └── presentation/            # Routers FastAPI, Dependências e Main
+│   ├── tests/
+│   │   ├── unit/                    # Testes de entidades e casos de uso
+│   │   └── integration/             # Testes de endpoints HTTP e autenticação
+│   ├── Dockerfile
+│   └── requirements.txt
+├── docker-compose.yml               # Orquestração do backend e Postgres 16
+├── public/
+│   └── memoji.png                   # Avatar Memoji 320x320 com transparência
+├── src/
+│   ├── components/
+│   │   ├── admin/                   # Modais e gerenciadores CRUD do painel
+│   │   ├── common/                  # Navbar, Footer, SpotifyCard, IconPicker
+│   │   ├── icons/                   # SVGs inline sem emojis com currentColor
+│   │   ├── sections/                # Seções semânticas da página principal
+│   │   └── terminal/                # Emulador de terminal macOS Zsh
+│   ├── config/                      # Validador estrito de variáveis de ambiente
+│   ├── context/                     # DataContext com cache local e sincronização
+│   ├── data/                        # Datasets padrão e coleções
+│   ├── hooks/                       # Custom hooks (useSpotify, etc.)
+│   ├── services/                    # Clientes de API e OAuth Manager
+│   └── types/                       # Interfaces e tipos estritos TypeScript
+├── package.json
+└── vite.config.ts
 ```
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 8. Licença e Autoria
 
-### Pré-requisitos
-- Node.js versão 18+ (recomendado Node 20+)
-- npm versão 9+
-
-### Instalação de Dependências
-```bash
-npm install
-```
-
-### Executar em Modo de Desenvolvimento
-```bash
-npm run dev
-```
-A aplicação iniciará localmente no endereço padrão: [http://localhost:3000](http://localhost:3000).
-
-- Para testar a API do Spotify localmente: acesse [http://localhost:3000/api/spotify](http://localhost:3000/api/spotify).
-- Para abrir o Painel Administrativo Privado: clique no ícone de cadeado no menu ou pressione `Ctrl + Shift + A` (senha padrão: `admin`).
-
-### Compilar para Produção (Build)
-```bash
-npm run build
-```
-O build estático e minificado será gerado na pasta `dist/`.
-
----
-
-## 🎵 Configuração da API do Spotify (Opcional)
-
-Para conectar o widget de reprodução à sua conta oficial do Spotify:
-1. Crie uma aplicação no [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-2. Obtenha o `Client ID`, `Client Secret` e gere um `Refresh Token` com os escopos `user-read-currently-playing` e `user-read-recently-played`.
-3. Crie um arquivo `.env` na raiz do projeto baseado em `.env.example`:
-```env
-SPOTIFY_CLIENT_ID=seu_client_id
-SPOTIFY_CLIENT_SECRET=seu_client_secret
-SPOTIFY_REFRESH_TOKEN=seu_refresh_token
-```
-Caso as variáveis não estejam preenchidas, a aplicação ativa automaticamente o **Modo Demonstração (Mock)** com dados de teste e reprodução simulada.
+Projeto concebido e desenvolvido por **Elynne Lima** sob as diretrizes de código limpo de Kent Beck, Clean Architecture de Robert C. Martin e Domain-Driven Design de Eric Evans.
