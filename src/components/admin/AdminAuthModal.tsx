@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LockIcon, CloseIcon, CheckIcon } from '@/components/icons';
+import { apiService } from '@/services/apiService';
 
 /**
  * Props specification for AdminAuthModal.
@@ -12,7 +13,7 @@ export interface AdminAuthModalProps {
 
 /**
  * Private authentication challenge protecting access to the admin dashboard.
- * Requires passcode verification before granting administration privilege.
+ * Supports backend JWT token generation with resilient local passcode verification.
  */
 export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   isOpen,
@@ -21,24 +22,41 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
 }) => {
   const [passcode, setPasscode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPass = passcode.trim();
 
-    // Default local passcode is 'admin' or 'elyyihz'
+    // Default local fallback passcodes
     const validPasscodes = ['admin', 'elyyihz', 'ely2026'];
 
-    if (validPasscodes.includes(passcode.trim().toLowerCase())) {
-      setErrorMessage('');
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      // Attempt backend authentication first
+      await apiService.login('elyyihz', cleanPass);
+      setIsLoading(false);
       setPasscode('');
       onAuthenticated();
-    } else {
-      setErrorMessage('Código de acesso inválido. Tente novamente.');
+      return;
+    } catch {
+      // Backend is offline or credentials rejected, check local fallback
+      if (validPasscodes.includes(cleanPass.toLowerCase())) {
+        setIsLoading(false);
+        setPasscode('');
+        onAuthenticated();
+        return;
+      }
     }
+
+    setIsLoading(false);
+    setErrorMessage('Código de acesso inválido. Tente novamente.');
   };
 
   return (
@@ -99,10 +117,11 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primaryHover transition-all shadow-glow-blue flex items-center gap-1.5"
+              disabled={isLoading}
+              className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primaryHover disabled:opacity-50 transition-all shadow-glow-blue flex items-center gap-1.5"
             >
               <CheckIcon className="w-4 h-4" />
-              <span>Autenticar</span>
+              <span>{isLoading ? 'Autenticando...' : 'Autenticar'}</span>
             </button>
           </div>
         </form>

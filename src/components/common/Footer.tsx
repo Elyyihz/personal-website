@@ -1,16 +1,17 @@
 import React from 'react';
-import { GithubIcon, LinkedinIcon, MailIcon, LockIcon } from '@/components/icons';
+import { GithubIcon, LinkedinIcon, MailIcon, LockIcon, TerminalIcon } from '@/components/icons';
 import { profileData } from '@/data/profileData';
 
 export interface FooterProps {
   onOpenAdmin?: () => void;
+  onOpenTerminal?: () => void;
 }
 
 /**
  * Footer component displaying brand mark, copyright, and direct social links.
  * All icons rendered strictly as inline SVGs using currentColor.
  */
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) => {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -29,6 +30,17 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
 
         {/* Social Network Icon Endpoints */}
         <div className="flex items-center gap-3">
+          {onOpenTerminal && (
+            <button
+              type="button"
+              onClick={onOpenTerminal}
+              aria-label="Abrir Terminal macOS Zsh"
+              title="Terminal Zsh (Ctrl+` ou Cmd+`)"
+              className="w-11 h-11 rounded-xl bg-brand-deep flex items-center justify-center border border-cyan-400/20 text-brand-text hover:text-cyan-400 hover:border-cyan-400 transition-all hover:scale-105"
+            >
+              <TerminalIcon className="w-5 h-5" />
+            </button>
+          )}
           {onOpenAdmin && (
             <button
               type="button"

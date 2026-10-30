@@ -5,11 +5,13 @@ import {
   CodeIcon,
   GiftIcon,
   HeadphonesIcon,
+  HeartIcon,
   RefreshIcon,
 } from '@/components/icons';
 import { ProjectsManager } from './ProjectsManager';
 import { WishlistManager } from './WishlistManager';
 import { MediaManager } from './MediaManager';
+import { HobbiesManager } from './HobbiesManager';
 import { useData } from '@/context/DataContext';
 
 export interface AdminDashboardProps {
@@ -18,7 +20,7 @@ export interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'projects' | 'wishlist' | 'media';
+type AdminTab = 'projects' | 'wishlist' | 'media' | 'hobbies';
 
 /**
  * Admin Dashboard root modal component providing full CRUD for projects, wishlist, and consumed media.
@@ -57,6 +59,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       id: 'media',
       label: 'Mídias Consumidas',
       icon: <HeadphonesIcon className="w-4 h-4" />,
+    },
+    {
+      id: 'hobbies',
+      label: 'Gostos & Hobbies',
+      icon: <HeartIcon className="w-4 h-4" />,
     },
   ];
 
@@ -157,6 +164,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {activeTab === 'projects' && <ProjectsManager />}
           {activeTab === 'wishlist' && <WishlistManager />}
           {activeTab === 'media' && <MediaManager />}
+          {activeTab === 'hobbies' && <HobbiesManager />}
         </div>
       </div>
     </div>

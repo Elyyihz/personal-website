@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { MailIcon, LockIcon } from '@/components/icons';
+import { MailIcon, LockIcon, TerminalIcon } from '@/components/icons';
 
 export interface NavbarProps {
   onOpenAdmin?: () => void;
+  onOpenTerminal?: () => void;
 }
 
 /**
  * Fixed top navigation bar with blur effect and semantic section anchors.
  */
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -49,6 +50,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
 
         {/* Right CTA and Admin Access Buttons */}
         <div className="hidden md:flex items-center gap-3">
+          {onOpenTerminal && (
+            <button
+              type="button"
+              onClick={onOpenTerminal}
+              title="Abrir Terminal macOS Zsh (Ctrl+` ou Cmd+`)"
+              className="p-2 rounded-lg text-brand-textMuted hover:text-cyan-400 hover:bg-brand-surface border border-white/5 transition-all font-mono"
+              aria-label="Abrir Terminal Zsh"
+            >
+              <TerminalIcon className="w-4 h-4" />
+            </button>
+          )}
+
           {onOpenAdmin && (
             <button
               type="button"
@@ -116,6 +129,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
             </a>
           ))}
           <div className="flex gap-2 pt-2">
+            {onOpenTerminal && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenTerminal();
+                }}
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-textMuted hover:text-cyan-400 bg-brand-deep border border-brand-accent/20 flex items-center justify-center gap-2"
+              >
+                <TerminalIcon className="w-3.5 h-3.5" />
+                <span>Terminal</span>
+              </button>
+            )}
             {onOpenAdmin && (
               <button
                 type="button"

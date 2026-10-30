@@ -2,9 +2,11 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { Project } from '@/types/project';
 import type { WishlistItem } from '@/types/wishlist';
 import type { ConsumedMedia } from '@/types/media';
+import type { HobbyItem } from '@/types/hobby';
 import { projectsData as initialProjects } from '@/data/projectsData';
 import { allWishlistData as initialWishlist } from '@/data/wishlistData';
 import { defaultConsumedMedia as initialMedia } from '@/data/mediaData';
+import { defaultHobbiesData as initialHobbies } from '@/data/interestsData';
 import { Logger } from '@/utils/logger';
 
 /**
@@ -19,6 +21,7 @@ export interface DataContextValue {
   projects: Project[];
   wishlistItems: WishlistItem[];
   consumedMedia: ConsumedMedia;
+  hobbies: HobbyItem[];
 
   // Project CRUD operations
   createProject: (project: Omit<Project, 'id'>) => void;
@@ -32,6 +35,11 @@ export interface DataContextValue {
 
   // Media Management operations
   updateConsumedMedia: (updates: Partial<ConsumedMedia>) => void;
+
+  // Hobbies & Interests CRUD operations
+  createHobby: (hobby: Omit<HobbyItem, 'id'>) => void;
+  updateHobby: (id: string, updates: Partial<HobbyItem>) => void;
+  deleteHobby: (id: string) => void;
 
   // Utility reset action
   resetToDefaults: () => void;
@@ -82,6 +90,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return initialMedia;
   });
 
+  const [hobbies, setHobbies] = useState<HobbyItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_hobbies`);
+      if (saved) {
+        return JSON.parse(saved) as HobbyItem[];
+      }
+    } catch {
+      // Fallback on parse failure
+    }
+    return initialHobbies;
+  });
+
   // Synchronize projects to localStorage
   useEffect(() => {
     try {
@@ -108,6 +128,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logger.logError('Failed to persist media to localStorage', err);
     }
   }, [consumedMedia, logger]);
+
+  // Synchronize hobbies to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${STORAGE_KEY}_hobbies`, JSON.stringify(hobbies));
+    } catch (err) {
+      logger.logError('Failed to persist hobbies to localStorage', err);
+    }
+  }, [hobbies, logger]);
 
   // Project CRUD Actions
   const createProject = useCallback(
@@ -186,16 +215,50 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [logger]
   );
 
+  // Hobbies & Interests Actions
+  const createHobby = useCallback(
+    (newHobbyData: Omit<HobbyItem, 'id'>) => {
+      logger.logStepStart('CreateHobby', { name: newHobbyData.name });
+      const newId = `hobby-${Date.now()}`;
+      const hobby: HobbyItem = { ...newHobbyData, id: newId };
+      setHobbies((prev) => [...prev, hobby]);
+      logger.logStepConclusion('CreateHobby', `Created hobby with id ${newId}`);
+    },
+    [logger]
+  );
+
+  const updateHobby = useCallback(
+    (id: string, updates: Partial<HobbyItem>) => {
+      logger.logStepStart('UpdateHobby', { id });
+      setHobbies((prev) =>
+        prev.map((h) => (h.id === id ? { ...h, ...updates } : h))
+      );
+      logger.logStepConclusion('UpdateHobby', `Updated hobby ${id}`);
+    },
+    [logger]
+  );
+
+  const deleteHobby = useCallback(
+    (id: string) => {
+      logger.logStepStart('DeleteHobby', { id });
+      setHobbies((prev) => prev.filter((h) => h.id !== id));
+      logger.logStepConclusion('DeleteHobby', `Deleted hobby ${id}`);
+    },
+    [logger]
+  );
+
   // Reset Action
   const resetToDefaults = useCallback(() => {
     logger.logDecision('ResetToDefaults', 'User requested full reset of local storage cache.');
     setProjects(initialProjects);
     setWishlistItems(initialWishlist);
     setConsumedMedia(initialMedia);
+    setHobbies(initialHobbies);
     try {
       localStorage.removeItem(`${STORAGE_KEY}_projects`);
       localStorage.removeItem(`${STORAGE_KEY}_wishlist`);
       localStorage.removeItem(`${STORAGE_KEY}_media`);
+      localStorage.removeItem(`${STORAGE_KEY}_hobbies`);
     } catch {
       // Ignored
     }
@@ -208,6 +271,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         projects,
         wishlistItems,
         consumedMedia,
+        hobbies,
         createProject,
         updateProject,
         deleteProject,
@@ -215,6 +279,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateWishlistItem,
         deleteWishlistItem,
         updateConsumedMedia,
+        createHobby,
+        updateHobby,
+        deleteHobby,
         resetToDefaults,
       }}
     >

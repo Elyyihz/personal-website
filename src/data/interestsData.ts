@@ -1,51 +1,46 @@
-/**
- * Item specification for personal interests and affinities.
- */
-export interface InterestItem {
-  id: string;
-  name: string;
-  iconKey: 'plant' | 'gamepad' | 'bone' | 'hexagon' | 'wand' | 'coffee';
-  category: string;
-}
+import type { HobbyItem } from '@/types/hobby';
 
 /**
- * Curated list of personal interests rendered in the 'O Que Eu Gosto' section.
+ * Curated initial list of personal interests rendered in the 'O Que Eu Gosto' section.
  */
-export const interestsData: InterestItem[] = [
+export const defaultHobbiesData: HobbyItem[] = [
   {
     id: 'interest-1',
     name: 'Stardew Valley',
-    iconKey: 'plant',
+    iconSlug: 'plant',
     category: 'Cozy Gaming',
   },
   {
     id: 'interest-2',
     name: 'Pokémon',
-    iconKey: 'gamepad',
+    iconSlug: 'gamepad',
     category: 'Gaming & Lore',
   },
   {
     id: 'interest-3',
     name: 'Paleontologia / Paleo Pines',
-    iconKey: 'bone',
+    iconSlug: 'bone',
     category: 'Ciência & Dinossauros',
   },
   {
     id: 'interest-4',
     name: 'Engenharia Biomimética',
-    iconKey: 'hexagon',
+    iconSlug: 'hexagon',
     category: 'Bioengenharia',
   },
   {
     id: 'interest-5',
     name: 'Ella Enchanted',
-    iconKey: 'wand',
+    iconSlug: 'wand',
     category: 'Fantasia & Clássicos',
   },
   {
     id: 'interest-6',
     name: 'Cafés Especiais',
-    iconKey: 'coffee',
+    iconSlug: 'coffee',
     category: 'Sensorial & Barismo',
   },
 ];
+
+export const interestsData = defaultHobbiesData;
+export type { HobbyItem as InterestItem };

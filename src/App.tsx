@@ -11,9 +11,12 @@ import { WishlistSection } from '@/components/sections/WishlistSection';
 import { ContactsSection } from '@/components/sections/ContactsSection';
 import { AdminAuthModal } from '@/components/admin/AdminAuthModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { MacTerminal } from '@/components/terminal/MacTerminal';
+import { SpotifyCallbackHandler } from '@/components/common/SpotifyCallbackHandler';
 
 /**
- * Root Application component assembling core semantic layout sections and private admin controls.
+ * Root Application component assembling core semantic layout sections, private admin controls,
+ * interactive macOS Zsh terminal emulation, and Spotify OAuth callback interception.
  * Implements strict dark theme palette focused on deep blue, slate-900, slate-300, and cyan-400 highlights.
  */
 export const App: React.FC = () => {
@@ -22,6 +25,13 @@ export const App: React.FC = () => {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+
+  // Check if current route is Spotify OAuth callback
+  const isSpotifyCallback =
+    typeof window !== 'undefined' &&
+    (window.location.pathname === '/callback' ||
+      window.location.search.includes('code='));
 
   /**
    * Evaluates authentication status when opening the admin center.
@@ -47,29 +57,51 @@ export const App: React.FC = () => {
     setIsAdminDashboardOpen(false);
   };
 
-  // Keyboard shortcut listener: Ctrl+Shift+A or Cmd+Shift+A opens admin
+  // Keyboard shortcut listener:
+  // - Ctrl+Shift+A or Cmd+Shift+A opens admin
+  // - Ctrl+` or Cmd+` or Ctrl+Shift+T toggles macOS Terminal mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Admin dashboard shortcut
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         handleOpenAdmin();
+        return;
+      }
+
+      // Terminal mode hidden shortcut
+      if (
+        ((e.ctrlKey || e.metaKey) && (e.key === '`' || e.key === '~')) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 't')
+      ) {
+        e.preventDefault();
+        setIsTerminalOpen((prev) => !prev);
       }
     };
 
-    // Check URL hash for direct #admin route
+    // Check URL hash for direct #admin or #terminal route
     if (window.location.hash === '#admin') {
       handleOpenAdmin();
+    } else if (window.location.hash === '#terminal') {
+      setIsTerminalOpen(true);
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAuthenticated]);
 
+  if (isSpotifyCallback) {
+    return <SpotifyCallbackHandler />;
+  }
+
   return (
     <DataProvider>
       <div className="min-h-screen bg-brand-deep text-brand-text flex flex-col font-sans selection:bg-brand-primary selection:text-white">
         {/* Top Navigation */}
-        <Navbar onOpenAdmin={handleOpenAdmin} />
+        <Navbar
+          onOpenAdmin={handleOpenAdmin}
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+        />
 
         {/* Main Semantic Layout */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-16 md:space-y-24">
@@ -83,7 +115,10 @@ export const App: React.FC = () => {
         </main>
 
         {/* Semantic Footer */}
-        <Footer onOpenAdmin={handleOpenAdmin} />
+        <Footer
+          onOpenAdmin={handleOpenAdmin}
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+        />
 
         {/* Private Administration Modals */}
         <AdminAuthModal
@@ -96,6 +131,12 @@ export const App: React.FC = () => {
           isOpen={isAdminDashboardOpen}
           onClose={() => setIsAdminDashboardOpen(false)}
           onLogout={handleLogout}
+        />
+
+        {/* Hidden macOS Zsh Terminal Mode */}
+        <MacTerminal
+          isOpen={isTerminalOpen}
+          onClose={() => setIsTerminalOpen(false)}
         />
       </div>
     </DataProvider>

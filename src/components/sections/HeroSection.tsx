@@ -50,14 +50,14 @@ export const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Visual Avatar with Ambient Glow */}
+        {/* Right Column: Visual Avatar with Ambient Glow rendering memoji.png */}
         <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 flex-shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand-accent/30 to-brand-primary/40 blur-2xl animate-pulse-subtle" />
-          <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-tr from-brand-accent/40 via-blue-500/30 to-brand-accent/20 border border-brand-accent/40 shadow-glow-cyan overflow-hidden">
+          <div className="relative w-full h-full rounded-full p-2 bg-gradient-to-tr from-brand-accent/40 via-blue-500/30 to-brand-accent/20 border border-brand-accent/40 shadow-glow-cyan flex items-center justify-center overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80"
-              alt={`Avatar de ${profileData.name}`}
-              className="w-full h-full object-cover rounded-full"
+              src="/memoji.png"
+              alt={`Avatar Memoji de ${profileData.name}`}
+              className="w-full h-full object-contain filter drop-shadow-[0_10px_20px_rgba(34,211,238,0.25)] transition-transform duration-300 hover:scale-105"
             />
           </div>
         </div>

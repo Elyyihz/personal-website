@@ -131,13 +131,18 @@ export const WishlistSection: React.FC = () => {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1.5 flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {item.category === 'Livros' && (
                       <BookOpenIcon className="w-3.5 h-3.5 text-brand-primary flex-shrink-0" />
                     )}
                     <span className="text-[10px] font-mono uppercase tracking-wider text-brand-accent">
                       {item.tag ?? item.category}
                     </span>
+                    {item.isFulfilled && (
+                      <span className="text-[9px] font-mono uppercase tracking-wider text-green-400 bg-green-500/10 border border-green-500/20 px-1.5 py-0.5 rounded">
+                        Adquirido
+                      </span>
+                    )}
                   </div>
                   <strong className="block text-sm font-bold text-brand-heading group-hover:text-brand-accent transition-colors truncate">
                     {item.title}

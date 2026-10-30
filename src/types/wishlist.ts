@@ -24,4 +24,7 @@ export interface WishlistItem {
 
   /** Optional badge descriptor (e.g. 'Amazon', 'Colecionador', 'Indie') */
   tag?: string;
+
+  /** Boolean flag indicating whether the item has already been acquired or fulfilled */
+  isFulfilled?: boolean;
 }
