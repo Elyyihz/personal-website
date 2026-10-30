@@ -25,6 +25,12 @@ export interface SpotifyTrack {
 
   /** Total track length expressed in milliseconds */
   durationMs: number;
+
+  /** ISO 8601 timestamp when the track was played (for recently played fallback) */
+  playedAt?: string;
+
+  /** Source indicating how the playback data was retrieved */
+  source?: 'currently-playing' | 'recently-played' | 'mock';
 }
 
 /**
