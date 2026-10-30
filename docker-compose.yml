@@ -46,6 +46,21 @@ services:
       timeout: 5s
       retries: 3
 
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-http://localhost:8000/api/v1}
+        VITE_SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
+        VITE_SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://localhost:3000/callback}
+    container_name: portfolio_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
 volumes:
   postgres_data:
     driver: local
