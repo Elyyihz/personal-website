@@ -38,11 +38,16 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Configure SQLAlchemy engine
+# Normalize legacy postgres:// scheme to postgresql://
+database_url = settings.database_url
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
 # SQLite requires check_same_thread=False
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
 
 engine = create_engine(
-    settings.database_url,
+    database_url,
     connect_args=connect_args,
     pool_pre_ping=True,
 )
