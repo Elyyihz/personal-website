@@ -1,0 +1,58 @@
+import React from 'react';
+import type { IconProps } from '@/types/icon';
+
+/**
+ * Inline SVG Activity / Pulse wave icon.
+ *
+ * @param props - Custom SVG attributes and styling classes.
+ * @returns An inline SVG element inheriting Tailwind currentColor.
+ */
+export const ActivityIcon: React.FC<IconProps> = ({ className = 'w-5 h-5', ariaLabel = 'Activity', ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-label={ariaLabel}
+      role="img"
+      {...props}
+    >
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  );
+};
+
+/**
+ * Inline SVG Chevron Right navigation icon.
+ *
+ * @param props - Custom SVG attributes and styling classes.
+ * @returns An inline SVG element inheriting Tailwind currentColor.
+ */
+export const ChevronRightIcon: React.FC<IconProps> = ({
+  className = 'w-5 h-5',
+  ariaLabel = 'Chevron Right',
+  ...props
+}) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-label={ariaLabel}
+      role="img"
+      {...props}
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+};
