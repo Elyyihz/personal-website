@@ -49,5 +49,7 @@ ENV/
 htmlcov/
 *.sqlite3
 *.db
+qdrant_storage/
+backend/qdrant_storage/
 
 

@@ -11,6 +11,7 @@ export interface ValidatedEnvironment {
   spotifyRedirectUri: string;
   spotifyRefreshToken: string;
   backendApiUrl: string;
+  geminiApiKey: string;
 }
 
 export class EnvironmentValidationError extends Error {
@@ -49,6 +50,8 @@ export function validateEnvironment(strict: boolean = false): ValidatedEnvironme
     env.SPOTIFY_REFRESH_TOKEN || env.VITE_SPOTIFY_REFRESH_TOKEN || '';
   const backendApiUrl =
     env.VITE_BACKEND_API_URL || 'http://localhost:8000';
+  const geminiApiKey =
+    env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || '';
 
   const missingKeys: string[] = [];
   if (!clientId) missingKeys.push('SPOTIFY_CLIENT_ID');
@@ -70,6 +73,7 @@ export function validateEnvironment(strict: boolean = false): ValidatedEnvironme
     spotifyRedirectUri: redirectUri,
     spotifyRefreshToken: refreshToken,
     backendApiUrl,
+    geminiApiKey,
   };
 }
 
