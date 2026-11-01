@@ -9,6 +9,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Integer,
+    Float,
 )
 from app.infrastructure.database.config import Base
 
@@ -73,11 +74,19 @@ class ConsumedMediaModel(Base):
     reading_cover_url = Column(Text, nullable=False)
     reading_reference_url = Column(Text, nullable=False)
     reading_status = Column(String(64), nullable=False, default="Lendo Atualmente")
+    reading_current_page = Column(Integer, default=184, nullable=False)
+    reading_total_pages = Column(Integer, default=260, nullable=False)
 
     watching_title = Column(String(250), nullable=False)
     watching_subtitle = Column(String(250), nullable=False)
     watching_cover_url = Column(Text, nullable=False)
     watching_category = Column(String(100), nullable=False)
+
+    gaming_title = Column(String(250), default="Stardew Valley", nullable=False)
+    gaming_platform = Column(String(100), default="PC / Steam", nullable=False)
+    gaming_status = Column(String(150), default="Em Progresso (Ano 3)", nullable=False)
+    gaming_cover_url = Column(Text, default="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=80", nullable=False)
+    gaming_hours_played = Column(Float, default=142.5, nullable=False)
 
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
 
@@ -128,3 +137,31 @@ class RAGDocumentModel(Base):
     def metadata_dict(self, val: dict) -> None:
         """Serializes dictionary to JSON string."""
         self.metadata_json = json.dumps(val or {})
+
+
+class ArticleModel(Base):
+    """Relational table mapping for synchronized Elyy.init newsletter articles."""
+    __tablename__ = "newsletter_articles"
+
+    id = Column(String(64), primary_key=True, index=True)
+    title = Column(String(250), nullable=False)
+    link = Column(String(500), unique=True, index=True, nullable=False)
+    description = Column(Text, nullable=False)
+    pub_date = Column(DateTime, default=utcnow, index=True, nullable=False)
+    author = Column(String(100), default="Elynne Lima", nullable=False)
+    tags_json = Column(Text, default="[]", nullable=False)
+    content_html = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+
+    @property
+    def tags(self) -> list[str]:
+        """Deserializes JSON tags list."""
+        try:
+            return json.loads(self.tags_json) if self.tags_json else []
+        except Exception:
+            return []
+
+    @tags.setter
+    def tags(self, val: list[str]) -> None:
+        """Serializes list of tags to JSON string."""
+        self.tags_json = json.dumps(list(val) if val else [])

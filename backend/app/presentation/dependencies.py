@@ -15,9 +15,11 @@ from app.infrastructure.repositories.sqlalchemy_repositories import (
     SqlAlchemyHobbyRepository,
     SqlAlchemyAdminUserRepository,
     SqlAlchemyRAGDocumentRepository,
+    SqlAlchemyArticleRepository,
 )
 from app.infrastructure.vector_store.qdrant_vector_store import QdrantVectorStoreAdapter
 from app.infrastructure.llm.gemini_gateway import GeminiLLMGateway
+from app.infrastructure.rss.rss_parser import RSSFeedParser
 from app.application.use_cases.project_use_cases import ProjectUseCases
 from app.application.use_cases.wishlist_use_cases import WishlistUseCases
 from app.application.use_cases.media_use_cases import MediaUseCases
@@ -30,6 +32,10 @@ from app.application.use_cases.rag_use_cases import (
     SearchKnowledgeBaseUseCase,
 )
 from app.application.use_cases.chat_use_cases import LangGraphRAGChatUseCase
+from app.application.use_cases.newsletter_use_cases import (
+    SyncNewsletterFeedUseCase,
+    ListArticlesUseCase,
+)
 from app.application.dtos.auth_dto import AdminProfileResponseDTO
 from app.domain.exceptions.domain_exceptions import AuthenticationFailedException
 
@@ -50,6 +56,7 @@ vector_store = QdrantVectorStoreAdapter(
 gemini_gateway = GeminiLLMGateway(
     api_key=settings.gemini_api_key,
 )
+rss_parser = RSSFeedParser()
 
 
 def get_vector_store() -> QdrantVectorStoreAdapter:
@@ -111,6 +118,23 @@ def get_chat_use_case(
         vector_store_repository=vstore,
         llm_gateway=llm,
     )
+
+
+def get_sync_newsletter_use_case(
+    db: Session = Depends(get_db),
+    rag_ingest: IngestRAGDocumentUseCase = Depends(get_ingest_rag_use_case),
+) -> SyncNewsletterFeedUseCase:
+    """Provides instantiated SyncNewsletterFeedUseCase with optional RAG integration."""
+    return SyncNewsletterFeedUseCase(
+        article_repository=SqlAlchemyArticleRepository(db),
+        rss_parser=rss_parser,
+        rag_ingest_use_case=rag_ingest,
+    )
+
+
+def get_list_articles_use_case(db: Session = Depends(get_db)) -> ListArticlesUseCase:
+    """Provides instantiated ListArticlesUseCase."""
+    return ListArticlesUseCase(article_repository=SqlAlchemyArticleRepository(db))
 
 
 def get_auth_use_cases(db: Session = Depends(get_db)) -> AuthUseCases:

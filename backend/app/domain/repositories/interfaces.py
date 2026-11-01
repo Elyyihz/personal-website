@@ -14,6 +14,7 @@ from app.domain.entities.admin import AdminUser
 from app.domain.entities.rag_document import RAGDocument
 from app.domain.entities.document_chunk import DocumentChunk
 from app.domain.entities.chat_session import ChatMessage
+from app.domain.entities.article import Article
 
 
 class ProjectRepository(ABC):
@@ -255,4 +256,38 @@ class LLMGatewayInterface(ABC):
         Yields:
             str: Incremental response token chunks.
         """
+        pass
+
+
+class ArticleRepository(ABC):
+    """Port interface for Article entity persistence operations."""
+
+    @abstractmethod
+    async def get_all(self) -> List[Article]:
+        """Retrieves all synchronized newsletter articles ordered by publication date."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, article_id: str) -> Optional[Article]:
+        """Retrieves article by unique identifier."""
+        pass
+
+    @abstractmethod
+    async def get_by_link(self, link: str) -> Optional[Article]:
+        """Retrieves article by canonical URL link."""
+        pass
+
+    @abstractmethod
+    async def save(self, article: Article) -> Article:
+        """Persists or updates an individual article."""
+        pass
+
+    @abstractmethod
+    async def save_batch(self, articles: List[Article]) -> int:
+        """Persists an ordered sequence of articles."""
+        pass
+
+    @abstractmethod
+    async def delete(self, article_id: str) -> bool:
+        """Removes article by identifier."""
         pass

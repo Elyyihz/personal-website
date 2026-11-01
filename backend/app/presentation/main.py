@@ -27,6 +27,7 @@ from app.presentation.routers.hobbies_router import router as hobbies_router
 from app.presentation.routers.spotify_router import router as spotify_router
 from app.presentation.routers.rag_router import router as rag_router
 from app.presentation.routers.chat_router import router as chat_router
+from app.presentation.routers.newsletter_router import router as newsletter_router
 from app.infrastructure.database.models import RAGDocumentModel
 from app.presentation.dependencies import vector_store, gemini_gateway
 from app.application.use_cases.rag_use_cases import TextChunker
@@ -306,6 +307,7 @@ app.include_router(hobbies_router, prefix="/api/v1")
 app.include_router(spotify_router, prefix="/api/v1")
 app.include_router(rag_router, prefix="/api/v1")
 app.include_router(chat_router, prefix="/api/v1")
+app.include_router(newsletter_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["Health"])
