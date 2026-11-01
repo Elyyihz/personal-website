@@ -5,6 +5,7 @@ import type { GameTelemetryStatus } from '@/types/game';
 
 export interface ActiveGameCardProps {
   className?: string;
+  game?: GameTelemetryStatus | null;
 }
 
 /**
@@ -13,8 +14,17 @@ export interface ActiveGameCardProps {
  * Fallbacks to HTTP 204 idle state when not in-game or disconnected.
  * Strictly adheres to zero emojis and inline SVGs with currentColor.
  */
-export const ActiveGameCard: React.FC<ActiveGameCardProps> = ({ className = '' }) => {
-  const [game, setGame] = useState<GameTelemetryStatus | null>(null);
+export const ActiveGameCard: React.FC<ActiveGameCardProps> = ({
+  className = '',
+  game: initialGame,
+}) => {
+  const [game, setGame] = useState<GameTelemetryStatus | null>(initialGame ?? null);
+
+  useEffect(() => {
+    if (initialGame !== undefined) {
+      setGame(initialGame);
+    }
+  }, [initialGame]);
 
   const fetchGameTelemetry = async () => {
     try {
@@ -26,10 +36,12 @@ export const ActiveGameCard: React.FC<ActiveGameCardProps> = ({ className = '' }
   };
 
   useEffect(() => {
-    fetchGameTelemetry();
-    const interval = setInterval(fetchGameTelemetry, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    if (initialGame === undefined) {
+      fetchGameTelemetry();
+      const interval = setInterval(fetchGameTelemetry, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [initialGame]);
 
   const isPlaying = game && game.is_playing;
 

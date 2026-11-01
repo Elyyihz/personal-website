@@ -33,7 +33,32 @@ from app.infrastructure.database.models import RAGDocumentModel
 from app.presentation.dependencies import vector_store, gemini_gateway
 from app.application.use_cases.rag_use_cases import TextChunker
 from app.domain.entities.document_chunk import DocumentChunk
+import json
 import uuid
+from sqlalchemy import text
+
+
+def run_schema_migrations():
+    """Runs lightweight idempotent column additions for existing production tables."""
+    try:
+        with engine.connect() as conn:
+            if engine.dialect.name == "postgresql":
+                conn.execute(
+                    text(
+                        """
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS reading_current_page INTEGER NOT NULL DEFAULT 184;
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS reading_total_pages INTEGER NOT NULL DEFAULT 260;
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS gaming_title VARCHAR(250) NOT NULL DEFAULT 'Stardew Valley';
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS gaming_platform VARCHAR(100) NOT NULL DEFAULT 'PC / Steam';
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS gaming_status VARCHAR(150) NOT NULL DEFAULT 'Em Progresso (Ano 3)';
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS gaming_cover_url TEXT NOT NULL DEFAULT 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=80';
+                        ALTER TABLE consumed_media ADD COLUMN IF NOT EXISTS gaming_hours_played DOUBLE PRECISION NOT NULL DEFAULT 142.5;
+                        """
+                    )
+                )
+                conn.commit()
+    except Exception:
+        pass
 
 
 def seed_initial_database():
@@ -251,6 +276,7 @@ async def seed_initial_rag_documents():
 async def lifespan(app: FastAPI):
     """Lifecycle context creating tables and seeding initial aggregates."""
     Base.metadata.create_all(bind=engine)
+    run_schema_migrations()
     seed_initial_database()
     await seed_initial_rag_documents()
     yield
