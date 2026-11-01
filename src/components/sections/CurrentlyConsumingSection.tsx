@@ -21,7 +21,7 @@ export const CurrentlyConsumingSection: React.FC = () => {
   const watching = consumedMedia.watching;
 
   return (
-    <section id="consumindo" className="scroll-mt-28 py-12">
+    <section id="consumindo" className="scroll-mt-24 py-4 md:py-6">
       <SectionHeading
         title="Consumindo Atualmente"
         badgeText="Leituras, Músicas & Mídia"

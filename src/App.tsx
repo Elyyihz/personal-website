@@ -104,7 +104,7 @@ export const App: React.FC = () => {
         />
 
         {/* Main Semantic Layout */}
-        <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-16 md:space-y-24">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-8 md:space-y-12">
           <HeroSection />
           <AboutMeSection />
           <WhatIDoSection />

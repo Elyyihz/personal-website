@@ -7,7 +7,7 @@ import { profileData } from '@/data/profileData';
  */
 export const HeroSection: React.FC = () => {
   return (
-    <section id="hero" className="pt-32 pb-16 md:pt-40 md:pb-24">
+    <section id="hero" className="pt-24 pb-4 md:pt-32 md:pb-6">
       <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-12">
         {/* Left Column: Headline and Call to Actions */}
         <div className="flex-1 space-y-6 text-center md:text-left">

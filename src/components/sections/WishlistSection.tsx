@@ -71,7 +71,7 @@ export const WishlistSection: React.FC = () => {
   const hasMore = visibleCount < filteredItems.length;
 
   return (
-    <section id="wishlist" className="scroll-mt-28 py-12">
+    <section id="wishlist" className="scroll-mt-24 py-4 md:py-6">
       <SectionHeading
         title="Wishlist"
         badgeText="Lista de Desejos Categorizada"

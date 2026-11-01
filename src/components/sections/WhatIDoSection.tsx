@@ -12,7 +12,7 @@ export const WhatIDoSection: React.FC = () => {
   const { projects } = useData();
 
   return (
-    <section id="projetos" className="scroll-mt-28 py-12">
+    <section id="projetos" className="scroll-mt-24 py-4 md:py-6">
       <SectionHeading
         title="O Que Eu Faço"
         badgeText="Engenharia & Arquitetura"

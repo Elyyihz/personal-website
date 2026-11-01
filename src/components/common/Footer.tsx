@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-brand-accent/15 bg-brand-surface/70 backdrop-blur-sm mt-24">
+    <footer className="border-t border-brand-accent/15 bg-brand-surface/70 backdrop-blur-sm mt-10 md:mt-12">
       <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="text-center md:text-left">
           <a
