@@ -3,6 +3,7 @@ import { SectionHeading } from '@/components/common/SectionHeading';
 import { CodeIcon, GithubIcon, ExternalLinkIcon, SparklesIcon } from '@/components/icons';
 import { getRegisteredIcon } from '@/components/icons/registry';
 import { useData } from '@/context/DataContext';
+import { SkillTree } from './SkillTree';
 
 /**
  * What I Do (Projects) section highlighting AI, distributed systems, and web architecture.
@@ -108,6 +109,9 @@ export const WhatIDoSection: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Gamified RPG Skill Tree Component */}
+      <SkillTree />
     </section>
   );
 };
