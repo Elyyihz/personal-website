@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     qdrant_storage_path: str = "./qdrant_storage"
 
+    # Steam Web API Telemetry Configurations
+    steam_api_key: str = ""
+    steam_id: str = ""
+
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
         env_file_encoding="utf-8",

@@ -20,6 +20,7 @@ from app.infrastructure.repositories.sqlalchemy_repositories import (
 from app.infrastructure.vector_store.qdrant_vector_store import QdrantVectorStoreAdapter
 from app.infrastructure.llm.gemini_gateway import GeminiLLMGateway
 from app.infrastructure.rss.rss_parser import RSSFeedParser
+from app.infrastructure.steam.steam_gateway import SteamWebAPIGateway
 from app.application.use_cases.project_use_cases import ProjectUseCases
 from app.application.use_cases.wishlist_use_cases import WishlistUseCases
 from app.application.use_cases.media_use_cases import MediaUseCases
@@ -35,6 +36,10 @@ from app.application.use_cases.chat_use_cases import LangGraphRAGChatUseCase
 from app.application.use_cases.newsletter_use_cases import (
     SyncNewsletterFeedUseCase,
     ListArticlesUseCase,
+)
+from app.application.use_cases.game_use_cases import (
+    GetCurrentGameUseCase,
+    UpdateDiscordRPCUseCase,
 )
 from app.application.dtos.auth_dto import AdminProfileResponseDTO
 from app.domain.exceptions.domain_exceptions import AuthenticationFailedException
@@ -57,6 +62,9 @@ gemini_gateway = GeminiLLMGateway(
     api_key=settings.gemini_api_key,
 )
 rss_parser = RSSFeedParser()
+steam_gateway = SteamWebAPIGateway(
+    api_key=settings.steam_api_key,
+)
 
 
 def get_vector_store() -> QdrantVectorStoreAdapter:
@@ -135,6 +143,28 @@ def get_sync_newsletter_use_case(
 def get_list_articles_use_case(db: Session = Depends(get_db)) -> ListArticlesUseCase:
     """Provides instantiated ListArticlesUseCase."""
     return ListArticlesUseCase(article_repository=SqlAlchemyArticleRepository(db))
+
+
+def get_current_game_use_case(
+    db: Session = Depends(get_db),
+) -> GetCurrentGameUseCase:
+    """Provides instantiated GetCurrentGameUseCase."""
+    return GetCurrentGameUseCase(
+        steam_gateway=steam_gateway,
+        steam_id=settings.steam_id,
+        media_repository=SqlAlchemyMediaRepository(db),
+    )
+
+
+def get_discord_rpc_use_case(
+    game_cases: GetCurrentGameUseCase = Depends(get_current_game_use_case),
+    db: Session = Depends(get_db),
+) -> UpdateDiscordRPCUseCase:
+    """Provides instantiated UpdateDiscordRPCUseCase."""
+    return UpdateDiscordRPCUseCase(
+        game_use_case=game_cases,
+        media_repository=SqlAlchemyMediaRepository(db),
+    )
 
 
 def get_auth_use_cases(db: Session = Depends(get_db)) -> AuthUseCases:

@@ -15,6 +15,7 @@ from app.domain.entities.rag_document import RAGDocument
 from app.domain.entities.document_chunk import DocumentChunk
 from app.domain.entities.chat_session import ChatMessage
 from app.domain.entities.article import Article
+from app.domain.entities.game_status import GameStatus
 
 
 class ProjectRepository(ABC):
@@ -290,4 +291,32 @@ class ArticleRepository(ABC):
     @abstractmethod
     async def delete(self, article_id: str) -> bool:
         """Removes article by identifier."""
+        pass
+
+
+class SteamGatewayInterface(ABC):
+    """Port interface for communicating with Steam Web API telemetry."""
+
+    @abstractmethod
+    async def get_active_game(self, steam_id: str) -> Optional[GameStatus]:
+        """Queries Steam Web API for the currently played game.
+
+        Args:
+            steam_id (str): Steam 64-bit ID.
+
+        Returns:
+            Optional[GameStatus]: Active game entity if playing, else None.
+        """
+        pass
+
+    @abstractmethod
+    async def get_recently_played_games(self, steam_id: str) -> List[GameStatus]:
+        """Queries Steam Web API for recently played games in the last 2 weeks.
+
+        Args:
+            steam_id (str): Steam 64-bit ID.
+
+        Returns:
+            List[GameStatus]: Sequence of recently played games.
+        """
         pass

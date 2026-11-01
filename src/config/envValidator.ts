@@ -12,6 +12,8 @@ export interface ValidatedEnvironment {
   spotifyRefreshToken: string;
   backendApiUrl: string;
   geminiApiKey: string;
+  steamApiKey: string;
+  steamId: string;
 }
 
 export class EnvironmentValidationError extends Error {
@@ -52,6 +54,10 @@ export function validateEnvironment(strict: boolean = false): ValidatedEnvironme
     env.VITE_BACKEND_API_URL || 'http://localhost:8000';
   const geminiApiKey =
     env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || '';
+  const steamApiKey =
+    env.STEAM_API_KEY || env.VITE_STEAM_API_KEY || '';
+  const steamId =
+    env.STEAM_ID || env.VITE_STEAM_ID || '';
 
   const missingKeys: string[] = [];
   if (!clientId) missingKeys.push('SPOTIFY_CLIENT_ID');
@@ -74,6 +80,8 @@ export function validateEnvironment(strict: boolean = false): ValidatedEnvironme
     spotifyRefreshToken: refreshToken,
     backendApiUrl,
     geminiApiKey,
+    steamApiKey,
+    steamId,
   };
 }
 
