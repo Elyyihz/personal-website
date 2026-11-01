@@ -25,6 +25,13 @@ from app.presentation.routers.wishlist_router import router as wishlist_router
 from app.presentation.routers.media_router import router as media_router
 from app.presentation.routers.hobbies_router import router as hobbies_router
 from app.presentation.routers.spotify_router import router as spotify_router
+from app.presentation.routers.rag_router import router as rag_router
+from app.presentation.routers.chat_router import router as chat_router
+from app.infrastructure.database.models import RAGDocumentModel
+from app.presentation.dependencies import vector_store, gemini_gateway
+from app.application.use_cases.rag_use_cases import TextChunker
+from app.domain.entities.document_chunk import DocumentChunk
+import uuid
 
 
 def seed_initial_database():
@@ -140,11 +147,110 @@ def seed_initial_database():
         db.close()
 
 
+async def seed_initial_rag_documents():
+    """Seeds default curated technical knowledge documents into relational and vector stores."""
+    db = SessionLocal()
+    try:
+        rag_count = db.query(RAGDocumentModel).count()
+        if rag_count == 0:
+            chunker = TextChunker(chunk_size=500, chunk_overlap=80)
+            seeds = [
+                {
+                    "id": "rag-saed",
+                    "title": "SAED (AI Augmented SAST Auditor)",
+                    "category": "project",
+                    "content": (
+                        "SAED é uma ferramenta avançada de auditoria de segurança estática aumentada por inteligência artificial. "
+                        "Integrada a fluxos de CI/CD via GitHub Actions, ela elimina falsos positivos de ferramentas tradicionais "
+                        "como Bandit utilizando triagem contextual por LLM e gera relatórios em formato SARIF compatíveis com o GitHub Security."
+                    ),
+                    "tags": ["Security", "SAST", "LLM", "SARIF"],
+                },
+                {
+                    "id": "rag-maia",
+                    "title": "MAIA (Multi-Agent Intelligent Architect)",
+                    "category": "project",
+                    "content": (
+                        "MAIA é um orquestrador multi-agente inteligente construído sobre LangGraph. "
+                        "Ele decompõe demandas complexas de engenharia em grafos determinísticos com validação estrita de contratos "
+                        "entre agentes, garantindo ausência de alucinações e rastreabilidade total de decisões de software."
+                    ),
+                    "tags": ["MultiAgent", "LangGraph", "Architecture", "CleanCode"],
+                },
+                {
+                    "id": "rag-docchecker",
+                    "title": "DocChecker (Doc Semantic Equivalence Engine)",
+                    "category": "project",
+                    "content": (
+                        "DocChecker é um motor de conformidade e equivalência semântica legal de documentos. "
+                        "Utiliza OCR avançado com PaddleOCR, busca vetorial densa com Qdrant e RAG assíncrono para verificar "
+                        "se contratos reestruturados preservam paridade semântica integral com minutas aprovadas."
+                    ),
+                    "tags": ["LegalTech", "RAG", "Qdrant", "FastAPI"],
+                },
+                {
+                    "id": "rag-elyy-clean-arch",
+                    "title": "Artigo Elyy.init: Clean Architecture e DDD em Microserviços",
+                    "category": "article",
+                    "content": (
+                        "Artigo técnico publicado na Elyy.init explorando a implementação de Clean Architecture e DDD "
+                        "em Python moderno com FastAPI e SQLAlchemy 2.0. Aborda a Regra de Dependência, isolamento do domínio puro, "
+                        "interfaces de portas de persistência e testes rigorosos com TDD."
+                    ),
+                    "tags": ["CleanArchitecture", "DDD", "FastAPI", "TDD"],
+                },
+                {
+                    "id": "rag-elyy-bio",
+                    "title": "Perfil Técnico e Habilidades de Elynne Lima",
+                    "category": "bio",
+                    "content": (
+                        "Elynne Lima é Engenheira de Sistemas de IA especializada em sistemas distribuídos de machine learning, "
+                        "orquestração de agentes autônomos com LangGraph, bancos de vetores como Qdrant e Clean Architecture. "
+                        "Personalidade analítica e pragmática (ISTP), com foco em alta performance e código limpo. "
+                        "Hobbies e interesses: jogos acolhedores como Stardew Valley e Pokémon, paleontologia, cafés especiais e engenharia biomimética."
+                    ),
+                    "tags": ["Bio", "Engineer", "AI", "ISTP"],
+                },
+            ]
+
+            for s in seeds:
+                segments = chunker.split_text(s["content"])
+                vectors = await gemini_gateway.embed_batch(segments)
+                chunks = []
+                for idx, (seg, vec) in enumerate(zip(segments, vectors)):
+                    chk = DocumentChunk(
+                        id=f"{s['id']}-chk-{idx}",
+                        document_id=s["id"],
+                        chunk_index=idx,
+                        content=seg,
+                        embedding=vec,
+                        metadata={"title": s["title"], "category": s["category"], "tags": s["tags"]},
+                    )
+                    chunks.append(chk)
+
+                await vector_store.upsert_chunks(chunks)
+
+                doc_model = RAGDocumentModel(
+                    id=s["id"],
+                    title=s["title"],
+                    content=s["content"],
+                    category=s["category"],
+                    chunk_count=len(chunks),
+                    metadata_json=json.dumps({"tags": s["tags"]}),
+                )
+                db.add(doc_model)
+
+            db.commit()
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle context creating tables and seeding initial aggregates."""
     Base.metadata.create_all(bind=engine)
     seed_initial_database()
+    await seed_initial_rag_documents()
     yield
 
 
@@ -198,6 +304,8 @@ app.include_router(wishlist_router, prefix="/api/v1")
 app.include_router(media_router, prefix="/api/v1")
 app.include_router(hobbies_router, prefix="/api/v1")
 app.include_router(spotify_router, prefix="/api/v1")
+app.include_router(rag_router, prefix="/api/v1")
+app.include_router(chat_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["Health"])

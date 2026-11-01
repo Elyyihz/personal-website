@@ -14,12 +14,22 @@ from app.infrastructure.repositories.sqlalchemy_repositories import (
     SqlAlchemyMediaRepository,
     SqlAlchemyHobbyRepository,
     SqlAlchemyAdminUserRepository,
+    SqlAlchemyRAGDocumentRepository,
 )
+from app.infrastructure.vector_store.qdrant_vector_store import QdrantVectorStoreAdapter
+from app.infrastructure.llm.gemini_gateway import GeminiLLMGateway
 from app.application.use_cases.project_use_cases import ProjectUseCases
 from app.application.use_cases.wishlist_use_cases import WishlistUseCases
 from app.application.use_cases.media_use_cases import MediaUseCases
 from app.application.use_cases.hobby_use_cases import HobbyUseCases
 from app.application.use_cases.auth_use_cases import AuthUseCases
+from app.application.use_cases.rag_use_cases import (
+    IngestRAGDocumentUseCase,
+    ListRAGDocumentsUseCase,
+    DeleteRAGDocumentUseCase,
+    SearchKnowledgeBaseUseCase,
+)
+from app.application.use_cases.chat_use_cases import LangGraphRAGChatUseCase
 from app.application.dtos.auth_dto import AdminProfileResponseDTO
 from app.domain.exceptions.domain_exceptions import AuthenticationFailedException
 
@@ -31,6 +41,76 @@ token_provider = JwtTokenProvider(
     algorithm=settings.jwt_algorithm,
     expiration_seconds=settings.jwt_expiration_seconds,
 )
+
+vector_store = QdrantVectorStoreAdapter(
+    storage_path=settings.qdrant_storage_path,
+    collection_name="elyy_knowledge_base",
+    vector_size=768,
+)
+gemini_gateway = GeminiLLMGateway(
+    api_key=settings.gemini_api_key,
+)
+
+
+def get_vector_store() -> QdrantVectorStoreAdapter:
+    """Provides singleton Qdrant vector store adapter."""
+    return vector_store
+
+
+def get_gemini_gateway() -> GeminiLLMGateway:
+    """Provides singleton Gemini LLM gateway."""
+    return gemini_gateway
+
+
+def get_ingest_rag_use_case(
+    db: Session = Depends(get_db),
+    vstore: QdrantVectorStoreAdapter = Depends(get_vector_store),
+    llm: GeminiLLMGateway = Depends(get_gemini_gateway),
+) -> IngestRAGDocumentUseCase:
+    """Provides instantiated IngestRAGDocumentUseCase."""
+    return IngestRAGDocumentUseCase(
+        document_repository=SqlAlchemyRAGDocumentRepository(db),
+        vector_store_repository=vstore,
+        llm_gateway=llm,
+    )
+
+
+def get_list_rag_use_case(db: Session = Depends(get_db)) -> ListRAGDocumentsUseCase:
+    """Provides instantiated ListRAGDocumentsUseCase."""
+    return ListRAGDocumentsUseCase(document_repository=SqlAlchemyRAGDocumentRepository(db))
+
+
+def get_delete_rag_use_case(
+    db: Session = Depends(get_db),
+    vstore: QdrantVectorStoreAdapter = Depends(get_vector_store),
+) -> DeleteRAGDocumentUseCase:
+    """Provides instantiated DeleteRAGDocumentUseCase."""
+    return DeleteRAGDocumentUseCase(
+        document_repository=SqlAlchemyRAGDocumentRepository(db),
+        vector_store_repository=vstore,
+    )
+
+
+def get_search_knowledge_use_case(
+    vstore: QdrantVectorStoreAdapter = Depends(get_vector_store),
+    llm: GeminiLLMGateway = Depends(get_gemini_gateway),
+) -> SearchKnowledgeBaseUseCase:
+    """Provides instantiated SearchKnowledgeBaseUseCase."""
+    return SearchKnowledgeBaseUseCase(
+        vector_store_repository=vstore,
+        llm_gateway=llm,
+    )
+
+
+def get_chat_use_case(
+    vstore: QdrantVectorStoreAdapter = Depends(get_vector_store),
+    llm: GeminiLLMGateway = Depends(get_gemini_gateway),
+) -> LangGraphRAGChatUseCase:
+    """Provides instantiated LangGraphRAGChatUseCase."""
+    return LangGraphRAGChatUseCase(
+        vector_store_repository=vstore,
+        llm_gateway=llm,
+    )
 
 
 def get_auth_use_cases(db: Session = Depends(get_db)) -> AuthUseCases:

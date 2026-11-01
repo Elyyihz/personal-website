@@ -8,12 +8,14 @@ from app.domain.entities.wishlist import WishlistItem
 from app.domain.entities.media import ConsumedMedia
 from app.domain.entities.hobby import HobbyInterest
 from app.domain.entities.admin import AdminUser
+from app.domain.entities.rag_document import RAGDocument
 from app.domain.repositories.interfaces import (
     ProjectRepository,
     WishlistRepository,
     MediaRepository,
     HobbyRepository,
     AdminUserRepository,
+    RAGDocumentRepository,
 )
 from app.infrastructure.database.models import (
     ProjectModel,
@@ -21,6 +23,7 @@ from app.infrastructure.database.models import (
     ConsumedMediaModel,
     HobbyModel,
     AdminUserModel,
+    RAGDocumentModel,
 )
 
 
@@ -283,5 +286,74 @@ class SqlAlchemyAdminUserRepository(AdminUserRepository):
             id=model.id,
             username=model.username,
             password_hash=model.password_hash,
+            created_at=model.created_at,
+        )
+
+
+class SqlAlchemyRAGDocumentRepository(RAGDocumentRepository):
+    """PostgreSQL / SQLite adapter for RAGDocument metadata persistence."""
+
+    def __init__(self, session: Session) -> None:
+        self._session = session
+
+    async def get_all(self) -> List[RAGDocument]:
+        models = (
+            self._session.query(RAGDocumentModel)
+            .order_by(RAGDocumentModel.created_at.desc())
+            .all()
+        )
+        return [self._to_entity(m) for m in models]
+
+    async def get_by_id(self, document_id: str) -> Optional[RAGDocument]:
+        model = (
+            self._session.query(RAGDocumentModel)
+            .filter(RAGDocumentModel.id == document_id)
+            .first()
+        )
+        return self._to_entity(model) if model else None
+
+    async def save(self, document: RAGDocument) -> RAGDocument:
+        model = (
+            self._session.query(RAGDocumentModel)
+            .filter(RAGDocumentModel.id == document.id)
+            .first()
+        )
+        if not model:
+            model = RAGDocumentModel(id=document.id)
+            self._session.add(model)
+
+        model.title = document.title
+        model.content = document.content
+        model.category = document.category
+        model.chunk_count = document.chunk_count
+        model.metadata_dict = document.metadata
+        model.created_at = document.created_at
+
+        self._session.commit()
+        self._session.refresh(model)
+        return self._to_entity(model)
+
+    async def delete(self, document_id: str) -> bool:
+        model = (
+            self._session.query(RAGDocumentModel)
+            .filter(RAGDocumentModel.id == document_id)
+            .first()
+        )
+        if not model:
+            return False
+
+        self._session.delete(model)
+        self._session.commit()
+        return True
+
+    @staticmethod
+    def _to_entity(model: RAGDocumentModel) -> RAGDocument:
+        return RAGDocument(
+            id=model.id,
+            title=model.title,
+            content=model.content,
+            category=model.category,
+            chunk_count=model.chunk_count,
+            metadata=model.metadata_dict,
             created_at=model.created_at,
         )

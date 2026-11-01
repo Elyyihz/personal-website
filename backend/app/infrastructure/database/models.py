@@ -8,6 +8,7 @@ from sqlalchemy import (
     Text,
     Boolean,
     DateTime,
+    Integer,
 )
 from app.infrastructure.database.config import Base
 
@@ -101,3 +102,29 @@ class AdminUserModel(Base):
     username = Column(String(100), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=utcnow, nullable=False)
+
+
+class RAGDocumentModel(Base):
+    """Relational table mapping for RAGDocument metadata persistence."""
+    __tablename__ = "rag_documents"
+
+    id = Column(String(64), primary_key=True, index=True)
+    title = Column(String(250), nullable=False)
+    content = Column(Text, nullable=False)
+    category = Column(String(64), nullable=False, default="general")
+    chunk_count = Column(Integer, default=0, nullable=False)
+    metadata_json = Column(Text, default="{}", nullable=False)
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+
+    @property
+    def metadata_dict(self) -> dict:
+        """Deserializes contextual JSON metadata."""
+        try:
+            return json.loads(self.metadata_json) if self.metadata_json else {}
+        except Exception:
+            return {}
+
+    @metadata_dict.setter
+    def metadata_dict(self, val: dict) -> None:
+        """Serializes dictionary to JSON string."""
+        self.metadata_json = json.dumps(val or {})

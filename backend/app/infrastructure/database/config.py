@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     spotify_redirect_uri: str = "http://localhost:3000/callback"
     spotify_refresh_token: str = ""
 
+    # AI Assistant & RAG Configurations (Google Gemini & Qdrant)
+    gemini_api_key: str = ""
+    qdrant_storage_path: str = "./qdrant_storage"
+
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
