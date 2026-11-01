@@ -33,6 +33,7 @@ export const HobbiesManager: React.FC = () => {
   const [editingHobbyId, setEditingHobbyId] = useState<string | null>(null);
   const [formData, setFormData] = useState<HobbyFormData>(emptyFormData);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const handleOpenCreate = () => {
     setEditingHobbyId(null);
@@ -65,18 +66,23 @@ export const HobbiesManager: React.FC = () => {
 
     if (editingHobbyId) {
       updateHobby(editingHobbyId, payload);
+      setFeedbackMessage('Afinidade salva com sucesso!');
     } else {
       createHobby(payload);
+      setFeedbackMessage('Afinidade cadastrada com sucesso!');
     }
 
     setIsFormOpen(false);
     setEditingHobbyId(null);
     setFormData(emptyFormData);
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   const handleDelete = (id: string) => {
     deleteHobby(id);
     setDeleteConfirmId(null);
+    setFeedbackMessage('Afinidade removida com sucesso!');
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   return (
@@ -96,10 +102,18 @@ export const HobbiesManager: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primaryHover text-white rounded-xl text-xs font-semibold shadow-glow-blue transition-all"
           >
             <PlusIcon className="w-4 h-4" />
-            <span>Novo Interesse</span>
+            <span>Adicionar Afinidade</span>
           </button>
         )}
       </div>
+
+      {/* Feedback Toast Notification */}
+      {feedbackMessage && (
+        <div className="p-3.5 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-xs text-emerald-300 font-semibold flex items-center gap-2 animate-fadeIn shadow-lg">
+          <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{feedbackMessage}</span>
+        </div>
+      )}
 
       {/* Inline Create / Edit Form */}
       {isFormOpen && (

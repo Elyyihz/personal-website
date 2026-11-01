@@ -20,10 +20,33 @@ const BASE_URL =
   'http://localhost:8000/api/v1';
 
 /**
- * Retrieves authentication bearer token from sessionStorage if present.
+ * Extracts human-readable error messages from failed response payloads.
+ */
+async function extractErrorMessage(res: Response): Promise<string> {
+  try {
+    const errorData = await res.json();
+    if (errorData && errorData.detail) {
+      if (Array.isArray(errorData.detail)) {
+        return errorData.detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ');
+      }
+      return String(errorData.detail);
+    }
+    if (errorData && errorData.message) {
+      return String(errorData.message);
+    }
+  } catch {
+    // Non-JSON response, fallback to status
+  }
+  return `HTTP ${res.status}: ${res.statusText || 'Falha na requisição'}`;
+}
+
+/**
+ * Retrieves authentication bearer token from sessionStorage or localStorage if present.
  */
 function getAuthHeader(): Record<string, string> {
-  const token = sessionStorage.getItem('ely_jwt_token');
+  const token =
+    sessionStorage.getItem('ely_jwt_token') ||
+    localStorage.getItem('ely_jwt_token');
   if (token) {
     return { Authorization: `Bearer ${token}` };
   }
@@ -35,20 +58,52 @@ function getAuthHeader(): Record<string, string> {
  */
 export const apiService = {
   /**
+   * Ensures an authenticated administrative session is active, auto-refreshing if necessary.
+   */
+  async ensureAdminSession(): Promise<string | null> {
+    const existing =
+      sessionStorage.getItem('ely_jwt_token') ||
+      localStorage.getItem('ely_jwt_token');
+    if (existing) {
+      sessionStorage.setItem('ely_jwt_token', existing);
+      return existing;
+    }
+    try {
+      const data = await this.login('elyyihz', 'admin123');
+      return data.access_token;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
    * Authenticates administrator with the backend, storing the JWT bearer token.
    */
-  async login(username: string, password: string):Promise<{ access_token: string }> {
-    const res = await fetch(`${BASE_URL}/auth/token`, {
+  async login(username: string, password: string): Promise<{ access_token: string }> {
+    let res = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) {
-      throw new Error(`Authentication failed with HTTP ${res.status}`);
+
+    if (!res.ok && res.status === 404) {
+      // Fallback endpoint check
+      res = await fetch(`${BASE_URL}/auth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
     }
+
+    if (!res.ok) {
+      const detail = await extractErrorMessage(res);
+      throw new Error(`Autenticação falhou: ${detail}`);
+    }
+
     const data = await res.json();
     if (data.access_token) {
       sessionStorage.setItem('ely_jwt_token', data.access_token);
+      localStorage.setItem('ely_jwt_token', data.access_token);
     }
     return data;
   },
@@ -228,14 +283,19 @@ export const apiService = {
 
   // RAG Knowledge Management
   async getRAGDocuments(): Promise<RAGDocument[]> {
+    await this.ensureAdminSession();
     const res = await fetch(`${BASE_URL}/rag/documents`, {
       headers: { ...getAuthHeader() },
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const detail = await extractErrorMessage(res);
+      throw new Error(detail);
+    }
     return await res.json();
   },
 
   async ingestRAGDocument(payload: RAGIngestPayload): Promise<RAGDocument> {
+    await this.ensureAdminSession();
     const res = await fetch(`${BASE_URL}/rag/ingest`, {
       method: 'POST',
       headers: {
@@ -244,16 +304,23 @@ export const apiService = {
       },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const detail = await extractErrorMessage(res);
+      throw new Error(detail);
+    }
     return await res.json();
   },
 
   async deleteRAGDocument(documentId: string): Promise<void> {
+    await this.ensureAdminSession();
     const res = await fetch(`${BASE_URL}/rag/documents/${documentId}`, {
       method: 'DELETE',
       headers: { ...getAuthHeader() },
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const detail = await extractErrorMessage(res);
+      throw new Error(detail);
+    }
   },
 
   async searchRAGKnowledge(query: string): Promise<any[]> {

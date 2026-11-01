@@ -56,6 +56,8 @@ export const App: React.FC = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('ely_admin_session');
+    sessionStorage.removeItem('ely_jwt_token');
+    localStorage.removeItem('ely_jwt_token');
     setIsAdminDashboardOpen(false);
   };
 

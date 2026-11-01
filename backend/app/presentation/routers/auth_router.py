@@ -14,6 +14,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/login", response_model=TokenResponseDTO)
+@router.post("/token", response_model=TokenResponseDTO)
 async def login(
     dto: LoginRequestDTO,
     auth_cases: AuthUseCases = Depends(get_auth_use_cases),

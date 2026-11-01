@@ -45,6 +45,7 @@ export const WishlistManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'Todos' | WishlistCategory>('Todos');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const categories: Array<'Todos' | WishlistCategory> = [
     'Todos',
@@ -108,18 +109,23 @@ export const WishlistManager: React.FC = () => {
 
     if (editingItemId) {
       updateWishlistItem(editingItemId, payload);
+      setFeedbackMessage('Item da wishlist salvo com sucesso!');
     } else {
       createWishlistItem(payload);
+      setFeedbackMessage('Item cadastrado na wishlist com sucesso!');
     }
 
     setIsFormOpen(false);
     setEditingItemId(null);
     setFormData(emptyFormData);
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   const handleDelete = (id: string) => {
     deleteWishlistItem(id);
     setDeleteConfirmId(null);
+    setFeedbackMessage('Item removido da wishlist com sucesso!');
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   return (
@@ -139,10 +145,18 @@ export const WishlistManager: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primaryHover text-white rounded-xl text-xs font-semibold shadow-glow-blue transition-all"
           >
             <PlusIcon className="w-4 h-4" />
-            <span>Novo Item</span>
+            <span>Adicionar Item</span>
           </button>
         )}
       </div>
+
+      {/* Feedback Toast Notification */}
+      {feedbackMessage && (
+        <div className="p-3.5 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-xs text-emerald-300 font-semibold flex items-center gap-2 animate-fadeIn shadow-lg">
+          <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{feedbackMessage}</span>
+        </div>
+      )}
 
       {/* Item Form */}
       {isFormOpen && (

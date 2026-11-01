@@ -13,6 +13,16 @@ from app.application.use_cases.game_use_cases import GetCurrentGameUseCase
 from app.infrastructure.repositories.sqlalchemy_repositories import SqlAlchemyMediaRepository
 
 
+class IdleSteamGateway(SteamGatewayInterface):
+    """Test double simulating when player is idle (not in-game)."""
+
+    async def get_active_game(self, steam_id: str):
+        return None
+
+    async def get_recently_played_games(self, steam_id: str):
+        return []
+
+
 class FailingSteamGateway(SteamGatewayInterface):
     """Test double simulating a network failure when connecting to Steam Web API."""
 
@@ -24,13 +34,29 @@ class FailingSteamGateway(SteamGatewayInterface):
 
 
 @pytest.mark.asyncio
-async def test_get_consuming_games_fallback_204_when_idle():
+async def test_get_consuming_games_fallback_204_when_idle(setup_test_database):
     """Validates HTTP 204 No Content when no game is active."""
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        res = await client.get("/api/consuming/games")
-        assert res.status_code == 204
-        assert res.text == ""
+    from tests.integration.conftest import TestingSessionLocal
+
+    db = TestingSessionLocal()
+    idle_use_case = GetCurrentGameUseCase(
+        steam_gateway=IdleSteamGateway(),
+        steam_id="76561198000000000",
+        media_repository=SqlAlchemyMediaRepository(db),
+    )
+    idle_use_case.set_discord_override(None)
+
+    app.dependency_overrides[get_current_game_use_case] = lambda: idle_use_case
+
+    try:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            res = await client.get("/api/consuming/games")
+            assert res.status_code == 204
+            assert res.text == ""
+    finally:
+        app.dependency_overrides.pop(get_current_game_use_case, None)
+        db.close()
 
 
 @pytest.mark.asyncio

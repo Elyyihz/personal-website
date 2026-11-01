@@ -149,12 +149,11 @@ export const ActiveGameCard: React.FC<ActiveGameCardProps> = ({
             <p className="text-xs text-brand-textMuted mt-0.5 truncate">
               {game.status_message || 'Ativa no momento'}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-[11px] font-mono text-emerald-400/90">
-              <span>Total: {game.total_hours.toFixed(1)}h</span>
-              {game.hours_last_2weeks > 0 && (
+            {game.hours_last_2weeks > 0 && (
+              <div className="flex items-center gap-3 mt-2 text-[11px] font-mono text-emerald-400/90">
                 <span>Recente: {game.hours_last_2weeks.toFixed(1)}h</span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 

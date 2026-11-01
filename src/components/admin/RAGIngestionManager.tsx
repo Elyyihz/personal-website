@@ -149,6 +149,11 @@ export const RAGIngestionManager: React.FC = () => {
       return;
     }
 
+    if (content.trim().length < 10) {
+      setErrorMessage('O conteúdo deve possuir ao menos 10 caracteres para indexação vetorial.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
     setSuccessMessage(null);

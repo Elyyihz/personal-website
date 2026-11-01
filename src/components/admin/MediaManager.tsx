@@ -36,6 +36,7 @@ export const MediaManager: React.FC = () => {
   );
 
   const [saveSuccessMessage, setSaveSuccessMessage] = useState('');
+  const [isSavedRecently, setIsSavedRecently] = useState(false);
 
   const handleSaveMedia = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +53,11 @@ export const MediaManager: React.FC = () => {
       },
     });
     setSaveSuccessMessage('Mídias consumidas, progresso de leitura e jogos atualizados com sucesso!');
-    setTimeout(() => setSaveSuccessMessage(''), 3000);
+    setIsSavedRecently(true);
+    setTimeout(() => {
+      setSaveSuccessMessage('');
+      setIsSavedRecently(false);
+    }, 3500);
   };
 
   return (
@@ -350,13 +355,29 @@ export const MediaManager: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="sticky bottom-0 bg-brand-deep/90 backdrop-blur-md py-4 border-t border-brand-accent/20 flex flex-col sm:flex-row items-center justify-between gap-3 z-10">
+          <div>
+            {saveSuccessMessage && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3.5 py-2 rounded-xl animate-fadeIn">
+                <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{saveSuccessMessage}</span>
+              </div>
+            )}
+          </div>
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primaryHover shadow-glow-blue flex items-center gap-2 transition-all"
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold text-white transition-all flex items-center gap-2 shadow-lg ${
+              isSavedRecently
+                ? 'bg-emerald-600 hover:bg-emerald-500 border border-emerald-400'
+                : 'bg-brand-primary hover:bg-brand-primaryHover shadow-glow-blue'
+            }`}
           >
             <CheckIcon className="w-4 h-4" />
-            <span>Salvar Alterações de Mídia &amp; Jogos</span>
+            <span>
+              {isSavedRecently
+                ? 'Salvo com Sucesso!'
+                : 'Salvar Alterações de Mídia & Jogos'}
+            </span>
           </button>
         </div>
       </form>
