@@ -10,20 +10,19 @@ const SPOTIFY_CURRENTLY_PLAYING_ENDPOINT =
   'https://api.spotify.com/v1/me/player/currently-playing';
 
 /**
- * Curated fallback display data returned when player is idle or offline.
+ * Default empty state when no music is actively playing.
  */
 export const DEFAULT_FALLBACK_TRACK: SpotifyPlaybackDisplay = {
-  title: 'Let Me Down Slowly',
-  artist: 'Alec Benjamin',
-  album: 'Narrated For You',
-  albumImageUrl:
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80',
-  songUrl: 'https://open.spotify.com/track/2qxmye6gAegTMjLKEBoR1d',
+  title: '',
+  artist: '',
+  album: '',
+  albumImageUrl: '',
+  songUrl: '',
   isPlaying: false,
   progressMs: 0,
-  durationMs: 169000,
+  durationMs: 0,
   isIdle204: true,
-  source: 'mock',
+  source: 'idle-204',
 };
 
 /**
@@ -169,21 +168,22 @@ export class SpotifyOAuthManager {
 
       if (backendResp.ok) {
         const payload = await backendResp.json();
-        if (payload.track) {
+        if (payload.track && payload.track.is_playing) {
           return {
             title: payload.track.title,
             artist: payload.track.artist,
             album: payload.track.album,
             albumImageUrl: payload.track.album_image_url,
             songUrl: payload.track.song_url,
-            isPlaying: payload.track.is_playing,
+            isPlaying: true,
             progressMs: payload.track.progress_ms,
             durationMs: payload.track.duration_ms,
             playedAt: payload.track.played_at,
-            isIdle204: !payload.track.is_playing,
-            source: payload.is_fallback_mock ? 'mock' : 'currently-playing',
+            isIdle204: false,
+            source: 'currently-playing',
           };
         }
+        return DEFAULT_FALLBACK_TRACK;
       }
     } catch {
       // Backend not running locally; fallback to direct Spotify OAuth token
@@ -203,25 +203,13 @@ export class SpotifyOAuthManager {
       });
 
       // HTTP 204 No Content: Spotify is closed or paused
-      if (response.status === 204) {
-        return {
-          ...DEFAULT_FALLBACK_TRACK,
-          isIdle204: true,
-          source: 'idle-204',
-        };
-      }
-
-      if (!response.ok) {
+      if (response.status === 204 || !response.ok) {
         return DEFAULT_FALLBACK_TRACK;
       }
 
       const raw = (await response.json()) as SpotifyCurrentlyPlayingRawResponse;
-      if (!raw.item) {
-        return {
-          ...DEFAULT_FALLBACK_TRACK,
-          isIdle204: true,
-          source: 'idle-204',
-        };
+      if (!raw.item || !raw.is_playing) {
+        return DEFAULT_FALLBACK_TRACK;
       }
 
       const artists = raw.item.artists.map((a) => a.name).join(', ');

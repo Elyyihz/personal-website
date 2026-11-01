@@ -44,22 +44,9 @@ class SpotifyTrackDTO(BaseModel):
 
 class SpotifyPlaybackResponseDTO(BaseModel):
     is_active: bool
-    is_fallback_mock: bool
+    is_fallback_mock: bool = False
     track: Optional[SpotifyTrackDTO] = None
     message: str = "Playback state resolved"
-
-
-FALLBACK_MOCK = SpotifyTrackDTO(
-    title="Let Me Down Slowly",
-    artist="Alec Benjamin",
-    album="Narrated For You",
-    album_image_url="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80",
-    song_url="https://open.spotify.com/track/2qxmye6gAegTMjLKEBoR1d",
-    is_playing=False,
-    progress_ms=0,
-    duration_ms=169000,
-    source="mock",
-)
 
 
 async def get_refreshed_access_token() -> Optional[str]:
@@ -165,90 +152,61 @@ async def spotify_oauth_callback(
 
 @router.get("/currently-playing", response_model=SpotifyPlaybackResponseDTO)
 async def get_currently_playing() -> SpotifyPlaybackResponseDTO:
-    """Queries Spotify Web API for currently-playing track with HTTP 204 fallback.
+    """Queries Spotify Web API for live currently-playing track.
 
     Requires user-read-currently-playing scope. Automatically requests fresh token
     using SPOTIFY_REFRESH_TOKEN in the background.
     """
     access_token = await get_refreshed_access_token()
 
-    # Guard clause: No live credentials provided, serve graceful fallback mock
     if not access_token:
         return SpotifyPlaybackResponseDTO(
             is_active=False,
-            is_fallback_mock=True,
-            track=FALLBACK_MOCK,
-            message="Spotify credentials not configured on backend. Serving curated demonstration fallback.",
+            is_fallback_mock=False,
+            track=None,
+            message="Spotify credentials not configured on backend.",
         )
 
     headers = {"Authorization": f"Bearer {access_token}"}
 
     async with httpx.AsyncClient(timeout=8.0) as client:
-        # Step 1: Query Currently Playing endpoint
-        current_resp = await client.get(SPOTIFY_CURRENTLY_PLAYING_URL, headers=headers)
+        try:
+            current_resp = await client.get(SPOTIFY_CURRENTLY_PLAYING_URL, headers=headers)
 
-        # HTTP 200 with track payload
-        if current_resp.status_code == 200:
-            data = current_resp.json()
-            item = data.get("item")
-            if item:
-                images = item.get("album", {}).get("images", [])
-                cover_url = images[0]["url"] if images else FALLBACK_MOCK.album_image_url
-                artists = ", ".join([a["name"] for a in item.get("artists", [])])
+            # HTTP 200 with live active track
+            if current_resp.status_code == 200:
+                data = current_resp.json()
+                item = data.get("item")
+                # Only return track if it is actively playing live
+                if item and data.get("is_playing", False):
+                    images = item.get("album", {}).get("images", [])
+                    cover_url = images[0]["url"] if images else ""
+                    artists = ", ".join([a["name"] for a in item.get("artists", [])])
 
-                track = SpotifyTrackDTO(
-                    title=item.get("name", "Unknown Title"),
-                    artist=artists or "Unknown Artist",
-                    album=item.get("album", {}).get("name", "Single"),
-                    album_image_url=cover_url,
-                    song_url=item.get("external_urls", {}).get("spotify", "https://open.spotify.com"),
-                    is_playing=data.get("is_playing", False),
-                    progress_ms=data.get("progress_ms", 0),
-                    duration_ms=item.get("duration_ms", 0),
-                    source="currently-playing",
-                )
-                return SpotifyPlaybackResponseDTO(
-                    is_active=True,
-                    is_fallback_mock=False,
-                    track=track,
-                    message="Currently playing track loaded successfully.",
-                )
+                    track = SpotifyTrackDTO(
+                        title=item.get("name", "Unknown Title"),
+                        artist=artists or "Unknown Artist",
+                        album=item.get("album", {}).get("name", "Single"),
+                        album_image_url=cover_url,
+                        song_url=item.get("external_urls", {}).get("spotify", "https://open.spotify.com"),
+                        is_playing=True,
+                        progress_ms=data.get("progress_ms", 0),
+                        duration_ms=item.get("duration_ms", 0),
+                        source="currently-playing",
+                    )
+                    return SpotifyPlaybackResponseDTO(
+                        is_active=True,
+                        is_fallback_mock=False,
+                        track=track,
+                        message="Currently playing track loaded successfully.",
+                    )
+        except Exception as e:
+            pass
 
-        # Step 2: Handle HTTP 204 (No Content / Spotify paused or closed) -> Check Recently Played
-        recent_resp = await client.get(SPOTIFY_RECENTLY_PLAYED_URL, headers=headers)
-        if recent_resp.status_code == 200:
-            recent_data = recent_resp.json()
-            items = recent_data.get("items", [])
-            if items:
-                first = items[0]
-                item = first.get("track", {})
-                images = item.get("album", {}).get("images", [])
-                cover_url = images[0]["url"] if images else FALLBACK_MOCK.album_image_url
-                artists = ", ".join([a["name"] for a in item.get("artists", [])])
-
-                track = SpotifyTrackDTO(
-                    title=item.get("name", "Unknown Title"),
-                    artist=artists or "Unknown Artist",
-                    album=item.get("album", {}).get("name", "Single"),
-                    album_image_url=cover_url,
-                    song_url=item.get("external_urls", {}).get("spotify", "https://open.spotify.com"),
-                    is_playing=False,
-                    progress_ms=0,
-                    duration_ms=item.get("duration_ms", 0),
-                    played_at=first.get("played_at"),
-                    source="recently-played",
-                )
-                return SpotifyPlaybackResponseDTO(
-                    is_active=False,
-                    is_fallback_mock=False,
-                    track=track,
-                    message="Spotify playback idle (HTTP 204). Showing recently played track.",
-                )
-
-    # Fallback state if both endpoints yield empty
+    # When no music is actively playing (HTTP 204, paused, or closed)
     return SpotifyPlaybackResponseDTO(
         is_active=False,
-        is_fallback_mock=True,
-        track=FALLBACK_MOCK,
-        message="Spotify player inactive or offline. Displaying fallback track.",
+        is_fallback_mock=False,
+        track=None,
+        message="No music currently playing on Spotify.",
     )

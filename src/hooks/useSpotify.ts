@@ -13,9 +13,13 @@ export const useSpotify = () => {
 
   /**
    * Refreshes playback status by querying Spotify Web API or backend proxy.
+   *
+   * @param isInitial - Whether this is the initial load (triggers spinner) or background poll.
    */
-  const loadTrack = useCallback(async () => {
-    setIsLoading(true);
+  const loadTrack = useCallback(async (isInitial = false) => {
+    if (isInitial) {
+      setIsLoading(true);
+    }
     try {
       const data = await spotifyOAuthManager.fetchCurrentlyPlaying();
       setPlayback(data);
@@ -23,16 +27,18 @@ export const useSpotify = () => {
     } catch {
       setPlayback(DEFAULT_FALLBACK_TRACK);
     } finally {
-      setIsLoading(false);
+      if (isInitial) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    void loadTrack();
-    // Poll every 30 seconds for live updates
+    void loadTrack(true);
+    // Poll every 10 seconds for live updates
     const pollInterval = setInterval(() => {
-      void loadTrack();
-    }, 30000);
+      void loadTrack(false);
+    }, 10000);
 
     return () => clearInterval(pollInterval);
   }, [loadTrack]);
