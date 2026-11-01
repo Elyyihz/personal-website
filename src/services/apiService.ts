@@ -7,6 +7,12 @@ import type { Project } from '@/types/project';
 import type { WishlistItem } from '@/types/wishlist';
 import type { ConsumedMedia } from '@/types/media';
 import type { HobbyItem } from '@/types/hobby';
+import type {
+  RAGDocument,
+  RAGIngestPayload,
+  ChatQueryPayload,
+  ChatQueryResponse,
+} from '@/types/rag';
 
 const BASE_URL =
   (import.meta.env.VITE_BACKEND_API_URL as string | undefined) ||
@@ -165,5 +171,115 @@ export const apiService = {
       iconSlug: item.icon_slug,
       category: item.category,
     }));
+  },
+
+  // RAG Knowledge Management
+  async getRAGDocuments(): Promise<RAGDocument[]> {
+    const res = await fetch(`${BASE_URL}/rag/documents`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
+  async ingestRAGDocument(payload: RAGIngestPayload): Promise<RAGDocument> {
+    const res = await fetch(`${BASE_URL}/rag/ingest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
+  async deleteRAGDocument(documentId: string): Promise<void> {
+    const res = await fetch(`${BASE_URL}/rag/documents/${documentId}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeader() },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  },
+
+  async searchRAGKnowledge(query: string): Promise<any[]> {
+    const res = await fetch(`${BASE_URL}/rag/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
+  // AI Assistant Conversational Chat
+  async sendChatMessage(payload: ChatQueryPayload): Promise<ChatQueryResponse> {
+    const res = await fetch(`${BASE_URL}/chat/message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
+  async streamChatMessage(
+    payload: ChatQueryPayload,
+    onToken: (token: string) => void,
+    onComplete: () => void,
+    onError: (err: any) => void
+  ): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      if (!response.body) {
+        throw new Error('Response body stream is not available');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+
+          const dataContent = trimmed.slice(5).trim();
+          if (dataContent === '[DONE]') {
+            onComplete();
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(dataContent);
+            if (parsed.token) {
+              onToken(parsed.token);
+            } else if (parsed.error) {
+              onError(new Error(parsed.error));
+              return;
+            }
+          } catch {
+            // Non-JSON raw token chunk
+            if (dataContent) onToken(dataContent);
+          }
+        }
+      }
+      onComplete();
+    } catch (err) {
+      onError(err);
+    }
   },
 };

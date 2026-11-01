@@ -13,6 +13,7 @@ import { AdminAuthModal } from '@/components/admin/AdminAuthModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { MacTerminal } from '@/components/terminal/MacTerminal';
 import { SpotifyCallbackHandler } from '@/components/common/SpotifyCallbackHandler';
+import { FloatingChatWidget } from '@/components/chat/FloatingChatWidget';
 
 /**
  * Root Application component assembling core semantic layout sections, private admin controls,
@@ -138,6 +139,9 @@ export const App: React.FC = () => {
           isOpen={isTerminalOpen}
           onClose={() => setIsTerminalOpen(false)}
         />
+
+        {/* Public Interactive AI Assistant Floating Widget */}
+        <FloatingChatWidget />
       </div>
     </DataProvider>
   );
