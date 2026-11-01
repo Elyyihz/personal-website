@@ -119,6 +119,24 @@ def test_consumed_media_creation_and_update():
     assert media.reading_author == "R.F. Kuang"
     assert media.reading_status == "Lido"
 
+    # Test reading progress tracking
+    media.update_reading_progress(current_page=184, total_pages=260)
+    assert media.reading_current_page == 184
+    assert media.reading_total_pages == 260
+    assert media.reading_progress_percentage == 71
+
+    # Test gaming status updates
+    media.update_gaming(
+        title="Stardew Valley",
+        platform="PC / Steam",
+        status="Em Progresso (Ano 3)",
+        cover_url="https://example.com/stardew.jpg",
+        hours_played=142.5,
+    )
+    assert media.gaming_title == "Stardew Valley"
+    assert media.gaming_platform == "PC / Steam"
+    assert media.gaming_hours_played == 142.5
+
 
 def test_hobby_interest_creation_and_update():
     """Validates HobbyInterest entity creation and attribute modification."""
