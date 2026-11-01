@@ -1,312 +1,355 @@
 import React, { useState } from 'react';
 import { SectionHeading } from '@/components/common/SectionHeading';
 import {
-  CodeIcon,
   HexagonIcon,
+  CodeIcon,
+  ChevronDownIcon,
   CheckIcon,
 } from '@/components/icons';
 
-interface CleanArchLayer {
+/**
+ * Condensed data structure for Clean Architecture layers.
+ */
+interface CleanArchLayerItem {
   number: string;
   name: string;
-  subtitle: string;
-  responsibility: string;
-  invariants: string[];
-  techExample: string;
+  badge: string;
+  summary: string;
+  rules: string[];
+  repoExample: string;
 }
 
-const CLEAN_ARCH_LAYERS: CleanArchLayer[] = [
+const CLEAN_ARCH_LAYERS: CleanArchLayerItem[] = [
   {
     number: '01',
     name: 'Domínio & Entidades',
-    subtitle: 'Enterprise Business Rules',
-    responsibility: 'O coração da aplicação. Modela agregados, value objects e validações invariantes de negócio.',
-    invariants: [
-      'Zero dependência de bibliotecas externas, drivers ou frameworks HTTP',
-      'Invariantes validadas no construtor via exceções puras de domínio',
-      'Regras imutáveis de negócio e cálculo de pontuação de paridade',
+    badge: 'Enterprise Rules',
+    summary: 'Modelagem do coração do sistema com regras puras e invariantes de negócio.',
+    rules: [
+      'Zero dependência de bibliotecas externas, drivers ou frameworks HTTP.',
+      'Validação de consistência e invariantes no próprio construtor da entidade.',
     ],
-    techExample: 'ConsumedMedia, RAGDocument, DocumentChunk, Article',
+    repoExample: 'GameStatus, ConsumedMedia, RAGDocument',
   },
   {
     number: '02',
-    name: 'Portas & Gateways (Abstração)',
-    subtitle: 'Dependency Inversion Principle',
-    responsibility: 'Contratos e interfaces abstratas (ports) que invertem a direção de dependência com a infraestrutura.',
-    invariants: [
-      'Interfaces definem o QUE o domínio precisa, nunca o COMO',
-      'Permite troca de tecnologia sem alterar uma única linha de regra de negócio',
-      'Mocking e testabilidade em isolamento sem conexões com bancos reais',
+    name: 'Portas & Gateways',
+    badge: 'Dependency Inversion',
+    summary: 'Contratos e interfaces abstratas que invertem o acoplamento com a infraestrutura.',
+    rules: [
+      'A interface define o "o quê" o domínio necessita, nunca o "como".',
+      'Permite testes com dublês e troca de fornecedor sem alterar o core.',
     ],
-    techExample: 'VectorStoreRepository, LLMGatewayInterface, ArticleRepository',
+    repoExample: 'SteamGatewayInterface, MediaRepositoryInterface',
   },
   {
     number: '03',
     name: 'Casos de Uso (Aplicação)',
-    subtitle: 'Application Business Rules',
-    responsibility: 'Orquestração de fluxos de negócio, processamento de DTOs, segmentação recursiva e grafos LangGraph.',
-    invariants: [
-      'Orquestra o grafo determinístico de execução do RAG',
-      'Segmenta blocos de texto respeitando fronteiras semânticas e overlap',
-      'Execução idempotente com logs rastreáveis de decisões e rejeições',
+    badge: 'Application Rules',
+    summary: 'Orquestração de regras de negócio, fluxos de dados e grafos de inferência.',
+    rules: [
+      'Depende exclusivamente das portas abstratas, sem conhecer implementações concretas.',
+      'Execução idempotente com logging de etapas e decisões de fluxo.',
     ],
-    techExample: 'LangGraphRAGChatUseCase, IngestRAGDocumentUseCase, SyncNewsletterFeedUseCase',
+    repoExample: 'GetCurrentGameUseCase, LangGraphRAGChatUseCase',
   },
   {
     number: '04',
     name: 'Adaptadores de Infraestrutura',
-    subtitle: 'Interface Adapters & Persistence',
-    responsibility: 'Implementações concretas que conectam as portas abstratas aos sistemas reais e serviços de nuvem.',
-    invariants: [
-      'Qdrant Vector Store para busca densa por cosseno (768 dimensões)',
-      'Google Gemini GenAI SDK para embeddings e inferência conversacional',
-      'SQLAlchemy 2.0 ORM conectando PostgreSQL em produção e SQLite em testes',
+    badge: 'Interface Adapters',
+    summary: 'Implementações concretas de persistência, clientes HTTP e conexões externas.',
+    rules: [
+      'Clientes reais para Steam Web API, Qdrant, Google Gemini e PostgreSQL.',
+      'Isola particularidades de bibliotecas de terceiros da aplicação.',
     ],
-    techExample: 'QdrantVectorStoreAdapter, GeminiLLMGateway, SqlAlchemyArticleRepository',
+    repoExample: 'SteamWebAPIGateway, SqlAlchemyMediaRepository',
   },
   {
     number: '05',
     name: 'Fronteira Externa (API & UI)',
-    subtitle: 'Frameworks, Drivers & Devices',
-    responsibility: 'A camada mais externa e descartável do sistema, responsável pela comunicação HTTP e renderização visual.',
-    invariants: [
-      'Endpoints FastAPI tipados com validação Pydantic estrita',
-      'Streaming Server-Sent Events (SSE) para efeito typewriter em tempo real',
-      'Interface reativa em React 18, TypeScript estrito e Tailwind CSS',
+    badge: 'Frameworks & Drivers',
+    summary: 'Ponto de entrada do sistema: roteamento HTTP, streaming e renderização reativa.',
+    rules: [
+      'Roteadores FastAPI com validação estrita de schemas Pydantic.',
+      'Interface em React 18, TypeScript e Tailwind CSS desacoplada do backend.',
     ],
-    techExample: 'chat_router.py, rag_router.py, FloatingChatWidget.tsx, RAGIngestionManager.tsx',
+    repoExample: 'games_router.py, LiveTelemetryCarousel.tsx',
   },
 ];
 
-interface ReviewLevel {
+/**
+ * Condensed data structure for Code Review taxonomy levels.
+ */
+interface CodeReviewLevelItem {
+  id: string;
   tag: string;
-  colorBadge: string;
-  colorBorder: string;
-  colorBg: string;
-  title: string;
-  description: string;
-  criteria: string[];
+  impact: string;
+  badgeStyle: string;
+  borderStyle: string;
+  summary: string;
+  rules: string[];
 }
 
-const CODE_REVIEW_LEVELS: ReviewLevel[] = [
+const CODE_REVIEW_LEVELS: CodeReviewLevelItem[] = [
   {
+    id: 'blocking',
     tag: '[Bloqueante]',
-    colorBadge: 'bg-red-950/80 text-red-300 border-red-500/50',
-    colorBorder: 'border-red-500/40 hover:border-red-500/70',
-    colorBg: 'bg-red-950/20',
-    title: 'Impede o Merge Imediatamente',
-    description: 'Falhas críticas arquiteturais, de segurança ou de corretude que violam as premissas inegociáveis do sistema.',
-    criteria: [
-      'Violação da Regra de Dependência (ex: Domínio importando FastAPI, SQLAlchemy ou SDKs)',
-      'Quebra de retrocompatibilidade de contrato de API (schemas OpenAPI/JSON alterados sem versionamento)',
-      'Vazamento de credenciais, chaves de API ou ausência de validações de acesso administrativo',
-      'Ausência de cobertura de testes unitários ou de integração em novos fluxos críticos de negócio',
+    impact: 'Impede o merge imediatamente',
+    badgeStyle: 'bg-red-950/70 text-red-300 border-red-500/40',
+    borderStyle: 'border-red-500/30',
+    summary: 'Falhas críticas arquiteturais, de segurança ou de conformidade com contratos.',
+    rules: [
+      'Violação da Regra de Dependência (ex: Domínio importando framework).',
+      'Quebra de contrato de API, schemas OpenAPI sem versionamento ou falta de testes.',
     ],
   },
   {
-    tag: '[Antes do merge / Pontos Cruciais]',
-    colorBadge: 'bg-amber-950/80 text-amber-300 border-amber-500/50',
-    colorBorder: 'border-amber-500/40 hover:border-amber-500/70',
-    colorBg: 'bg-amber-950/20',
-    title: 'Exige Resolução Antes do Merge',
-    description: 'Débito técnico relevante, falta de disciplina de código limpo ou ausência de observabilidade operacional.',
-    criteria: [
-      'Ausência de logs em pontos de decisão de negócio ou rejeição de parâmetros (regra de rastreabilidade)',
-      'Aninhamento profundo de if/else onde cláusulas de guarda (Beck\'s tidies) simplificam o fluxo',
-      'Uso de tipagem opaca (any não justificado) ou ausência de JSDocs/Google-style docstrings completas',
-      'Tratamento genérico de exceções que mascare causas raiz em chamadas assíncronas',
+    id: 'pre-merge',
+    tag: '[Antes do merge]',
+    impact: 'Exige resolução antes da conclusão',
+    badgeStyle: 'bg-amber-950/70 text-amber-300 border-amber-500/40',
+    borderStyle: 'border-amber-500/30',
+    summary: 'Débito técnico relevante, falta de disciplina de código limpo ou rastreabilidade.',
+    rules: [
+      'Ausência de logs em pontos de decisão de negócio ou rejeição de parâmetros.',
+      'Aninhamentos desnecessários onde cláusulas de guarda simplificam o fluxo.',
     ],
   },
   {
+    id: 'non-blocking',
     tag: '[Não bloqueia]',
-    colorBadge: 'bg-sky-950/80 text-sky-300 border-sky-500/50',
-    colorBorder: 'border-sky-500/40 hover:border-sky-500/70',
-    colorBg: 'bg-sky-950/20',
-    title: 'Sugestão Evolutiva Opcional',
-    description: 'Oportunidades de refatoração futura, simplificações idiomáticas ou enriquecimento de documentação.',
-    criteria: [
-      'Sugestão de otimização de queries ou loops onde a volumetria atual não apresenta gargalo',
-      'Ideias de abstração futura que ainda não possuem dois consumidores concretos ativos',
-      'Enriquecimento de comentários contextuais de negócio no padrão "Explain why, not what"',
-      'Sugestão de nomenclatura alternativa que seja ligeiramente mais expressiva',
+    impact: 'Sugestão evolutiva opcional',
+    badgeStyle: 'bg-sky-950/70 text-sky-300 border-sky-500/40',
+    borderStyle: 'border-sky-500/30',
+    summary: 'Oportunidades de refatoração futura e refinamentos idiomáticos não urgentes.',
+    rules: [
+      'Otimizações antecipadas onde a volumetria atual não apresenta gargalo.',
+      'Enriquecimento de comentários contextuais no padrão "Explain why".',
     ],
   },
   {
+    id: 'nits',
     tag: '[Nits]',
-    colorBadge: 'bg-slate-800/80 text-slate-300 border-slate-600/50',
-    colorBorder: 'border-white/10 hover:border-white/25',
-    colorBg: 'bg-slate-900/30',
-    title: 'Ajuste Cosmético Menor',
-    description: 'Polimento puramente visual ou de formatação que o autor pode aplicar livremente a seu critério.',
-    criteria: [
-      'Quebras de linha secundárias ou alinhamento vertical em declarações extensas',
-      'Pequenas correções tipográficas em docstrings ou documentações técnicas internas',
-      'Agrupamento estético de imports alfabéticos quando o linter não acusa erro',
-      'Ajustes de pontuação em descrições de parâmetros',
+    impact: 'Ajuste cosmético menor',
+    badgeStyle: 'bg-slate-800/70 text-slate-300 border-slate-600/40',
+    borderStyle: 'border-white/10',
+    summary: 'Polimento puramente visual ou de formatação a critério do autor.',
+    rules: [
+      'Pequenas correções tipográficas em docstrings ou documentação técnica.',
+      'Quebras de linha secundárias ou alinhamento vertical estético.',
     ],
   },
 ];
 
 /**
- * How I Work Section documenting Clean Architecture, Domain-Driven Design (DDD),
- * and the 4-Level Code Review Taxonomy.
+ * How I Work Section documenting Clean Architecture and Code Review practices.
+ * Utilizes collapsible accordion elements (sanfonas) to keep the information concise and scannable.
  */
 export const HowIWorkSection: React.FC = () => {
-  const [selectedLayer, setSelectedLayer] = useState<number>(0);
+  // Accordion state: index of active layer (null if closed)
+  const [openLayer, setOpenLayer] = useState<number | null>(0);
+  // Accordion state: id of active review level (null if closed)
+  const [openReview, setOpenReview] = useState<string | null>('blocking');
+
+  const toggleLayer = (index: number) => {
+    setOpenLayer((prev) => (prev === index ? null : index));
+  };
+
+  const toggleReview = (id: string) => {
+    setOpenReview((prev) => (prev === id ? null : id));
+  };
 
   return (
-    <section id="how-i-work" className="py-4 md:py-6">
+    <section id="how-i-work" className="scroll-mt-24 py-4 md:py-6">
       <SectionHeading
         title="How I Work"
-        badgeText="Clean Architecture, DDD & Code Review"
+        badgeText="Clean Architecture & Code Review"
         icon={<HexagonIcon className="w-7 h-7" />}
       />
 
-      <div className="space-y-12">
-        {/* Sub-section 1: Clean Architecture & DDD Flow */}
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
-            <div>
-              <h3 className="text-sm font-bold text-brand-heading flex items-center gap-2">
-                <HexagonIcon className="w-4 h-4 text-brand-accent" />
-                <span>Fluxo Arquitetural: Clean Architecture &amp; Domain-Driven Design</span>
-              </h3>
-              <p className="text-xs text-brand-textMuted mt-1">
-                A Regra de Dependência: Camadas internas desconhecem detalhes externos.
-              </p>
-            </div>
-            <div className="text-[11px] font-mono px-3 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent self-start sm:self-auto">
-              Escrita: Dentro para Fora • Leitura: Fora para Dentro
-            </div>
-          </div>
-
-          {/* Interactive Layers Step Navigation */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            {CLEAN_ARCH_LAYERS.map((layer, idx) => (
-              <button
-                key={layer.number}
-                type="button"
-                onClick={() => setSelectedLayer(idx)}
-                className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
-                  selectedLayer === idx
-                    ? 'bg-brand-surface border-brand-accent shadow-lg shadow-brand-accent/10'
-                    : 'bg-brand-deep/80 border-white/5 hover:border-white/20 text-brand-textMuted'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-mono font-bold ${selectedLayer === idx ? 'text-brand-accent' : 'text-brand-textMuted'}`}>
-                    {layer.number}
-                  </span>
-                  {selectedLayer === idx && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse" />
-                  )}
-                </div>
-                <div className="mt-2">
-                  <span className={`text-xs font-bold block ${selectedLayer === idx ? 'text-brand-heading' : 'text-brand-text'}`}>
-                    {layer.name}
-                  </span>
-                  <span className="text-[10px] text-brand-textMuted line-clamp-1">
-                    {layer.subtitle}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Detailed Active Layer Card */}
-          <div className="p-6 rounded-2xl bg-brand-surface border border-brand-accent/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none select-none text-8xl font-black font-mono">
-              {CLEAN_ARCH_LAYERS[selectedLayer].number}
-            </div>
-
-            <div className="space-y-4 max-w-3xl">
+      {/* Structured 2-Column Accordion Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Column 1: Clean Architecture (Sanfona das 5 Camadas) */}
+        <div className="bg-brand-surface rounded-2xl p-6 border border-brand-accent/20 shadow-lg space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <HexagonIcon className="w-5 h-5 text-brand-accent" />
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-brand-accent/15 text-brand-accent border border-brand-accent/30 font-bold">
-                    Camada {CLEAN_ARCH_LAYERS[selectedLayer].number}
-                  </span>
-                  <span className="text-xs text-brand-textMuted font-mono">
-                    {CLEAN_ARCH_LAYERS[selectedLayer].subtitle}
-                  </span>
-                </div>
-                <h4 className="text-lg font-bold text-brand-heading mt-1">
-                  {CLEAN_ARCH_LAYERS[selectedLayer].name}
-                </h4>
-                <p className="text-xs text-brand-text leading-relaxed mt-2">
-                  {CLEAN_ARCH_LAYERS[selectedLayer].responsibility}
+                <h3 className="text-base font-bold text-brand-heading">
+                  Clean Architecture &amp; DDD
+                </h3>
+                <p className="text-xs text-brand-textMuted">
+                  Regra de Dependência: do centro para a borda.
                 </p>
               </div>
-
-              <div className="space-y-2 pt-2 border-t border-white/5">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-brand-textMuted block">
-                  Invariantes &amp; Práticas de Engenharia:
-                </span>
-                <ul className="space-y-1.5">
-                  {CLEAN_ARCH_LAYERS[selectedLayer].invariants.map((inv, i) => (
-                    <li key={i} className="text-xs text-brand-textMuted flex items-start gap-2">
-                      <CheckIcon className="w-3.5 h-3.5 text-brand-accent shrink-0 mt-0.5" />
-                      <span>{inv}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="pt-2 text-[11px] font-mono text-brand-textMuted">
-                <span className="text-brand-accent font-semibold">Exemplos reais no repositório: </span>
-                <span className="text-brand-heading">{CLEAN_ARCH_LAYERS[selectedLayer].techExample}</span>
-              </div>
             </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-accent/10 border border-brand-accent/25 text-brand-accent">
+              5 Camadas
+            </span>
+          </div>
+
+          {/* Accordion List (Sanfona) */}
+          <div className="space-y-2.5">
+            {CLEAN_ARCH_LAYERS.map((layer, idx) => {
+              const isOpen = openLayer === idx;
+
+              return (
+                <div
+                  key={layer.number}
+                  className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                    isOpen
+                      ? 'border-brand-accent/50 bg-brand-deep/70 shadow-sm'
+                      : 'border-white/5 bg-brand-deep/30 hover:border-brand-accent/30'
+                  }`}
+                >
+                  {/* Accordion Header / Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={() => toggleLayer(idx)}
+                    className="w-full px-4 py-3 flex items-center justify-between text-left cursor-pointer transition-colors"
+                    aria-expanded={isOpen}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded ${
+                          isOpen
+                            ? 'bg-brand-accent/20 text-brand-accent'
+                            : 'bg-white/5 text-brand-textMuted'
+                        }`}
+                      >
+                        {layer.number}
+                      </span>
+                      <span
+                        className={`text-sm font-semibold truncate ${
+                          isOpen ? 'text-brand-heading' : 'text-brand-text'
+                        }`}
+                      >
+                        {layer.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      <span className="hidden sm:inline text-[10px] font-mono text-brand-textMuted">
+                        {layer.badge}
+                      </span>
+                      <ChevronDownIcon
+                        className={`w-4 h-4 text-brand-accent transition-transform duration-300 ${
+                          isOpen ? 'rotate-180' : 'rotate-0'
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Accordion Collapsible Body */}
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/5 text-xs animate-fadeIn">
+                      <p className="text-brand-text/90 leading-relaxed">
+                        {layer.summary}
+                      </p>
+
+                      <div className="space-y-1.5 pl-1">
+                        {layer.rules.map((rule, i) => (
+                          <div key={i} className="flex items-start gap-2 text-brand-textMuted">
+                            <CheckIcon className="w-3.5 h-3.5 text-brand-accent shrink-0 mt-0.5" />
+                            <span>{rule}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-2 text-[11px] font-mono border-t border-white/5 text-brand-textMuted">
+                        <span className="text-brand-accent font-semibold">Exemplos: </span>
+                        <span className="text-brand-heading">{layer.repoExample}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Sub-section 2: 4-Level Code Review Taxonomy */}
-        <div className="space-y-6">
-          <div className="border-b border-white/5 pb-3">
-            <h3 className="text-sm font-bold text-brand-heading flex items-center gap-2">
-              <CodeIcon className="w-4 h-4 text-brand-accent" />
-              <span>Taxonomia de Code Review em Quatro Níveis</span>
-            </h3>
-            <p className="text-xs text-brand-textMuted mt-1">
-              Feedback explícito, previsível e calibrado para acelerar o ciclo de entrega mantendo padrão arquitetural estrito.
-            </p>
+        {/* Column 2: Code Review Taxonomy (Sanfona dos 4 Níveis) */}
+        <div className="bg-brand-surface rounded-2xl p-6 border border-brand-accent/20 shadow-lg space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <CodeIcon className="w-5 h-5 text-brand-accent" />
+              <div>
+                <h3 className="text-base font-bold text-brand-heading">
+                  Taxonomia de Code Review
+                </h3>
+                <p className="text-xs text-brand-textMuted">
+                  Previsibilidade e rigor na revisão de pull requests.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-accent/10 border border-brand-accent/25 text-brand-accent">
+              4 Níveis
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {CODE_REVIEW_LEVELS.map((level) => (
-              <div
-                key={level.tag}
-                className={`p-5 rounded-2xl bg-brand-surface border ${level.colorBorder} transition-all duration-300 flex flex-col justify-between space-y-4`}
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${level.colorBadge}`}>
-                      {level.tag}
-                    </span>
-                    <span className="text-[11px] text-brand-textMuted font-medium">
-                      {level.title}
-                    </span>
-                  </div>
+          {/* Accordion List (Sanfona) */}
+          <div className="space-y-2.5">
+            {CODE_REVIEW_LEVELS.map((level) => {
+              const isOpen = openReview === level.id;
 
-                  <p className="text-xs text-brand-text leading-relaxed">
-                    {level.description}
-                  </p>
-                </div>
+              return (
+                <div
+                  key={level.id}
+                  className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                    isOpen
+                      ? `${level.borderStyle} bg-brand-deep/70 shadow-sm`
+                      : 'border-white/5 bg-brand-deep/30 hover:border-white/20'
+                  }`}
+                >
+                  {/* Accordion Header / Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={() => toggleReview(level.id)}
+                    className="w-full px-4 py-3 flex items-center justify-between text-left cursor-pointer transition-colors"
+                    aria-expanded={isOpen}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${level.badgeStyle}`}
+                      >
+                        {level.tag}
+                      </span>
+                      <span
+                        className={`text-xs sm:text-sm font-semibold truncate ${
+                          isOpen ? 'text-brand-heading' : 'text-brand-text'
+                        }`}
+                      >
+                        {level.impact}
+                      </span>
+                    </div>
 
-                <div className="space-y-2 pt-3 border-t border-white/5">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-brand-textMuted block">
-                    Critérios de Classificação:
-                  </span>
-                  <ul className="space-y-1.5">
-                    {level.criteria.map((crit, idx) => (
-                      <li key={idx} className="text-xs text-brand-textMuted flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-accent/60 shrink-0 mt-1.5" />
-                        <span>{crit}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    <ChevronDownIcon
+                      className={`w-4 h-4 text-brand-accent transition-transform duration-300 flex-shrink-0 ml-2 ${
+                        isOpen ? 'rotate-180' : 'rotate-0'
+                      }`}
+                    />
+                  </button>
+
+                  {/* Accordion Collapsible Body */}
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/5 text-xs animate-fadeIn">
+                      <p className="text-brand-text/90 leading-relaxed">
+                        {level.summary}
+                      </p>
+
+                      <div className="space-y-1.5 pl-1">
+                        {level.rules.map((rule, i) => (
+                          <div key={i} className="flex items-start gap-2 text-brand-textMuted">
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-accent/70 shrink-0 mt-1.5" />
+                            <span>{rule}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
