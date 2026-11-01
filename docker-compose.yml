@@ -36,7 +36,7 @@ services:
       ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-admin123}
       SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
-      SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://localhost:3000/callback}
+      SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://127.0.0.1:3000/callback}
       SPOTIFY_REFRESH_TOKEN: ${SPOTIFY_REFRESH_TOKEN:-}
     ports:
       - "8000:8000"
@@ -53,7 +53,7 @@ services:
       args:
         VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-http://localhost:8000/api/v1}
         VITE_SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
-        VITE_SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://localhost:3000/callback}
+        VITE_SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-http://127.0.0.1:3000/callback}
     container_name: portfolio_frontend
     restart: unless-stopped
     depends_on:
