@@ -7,6 +7,7 @@ import type { Project } from '@/types/project';
 import type { WishlistItem } from '@/types/wishlist';
 import type { ConsumedMedia } from '@/types/media';
 import type { HobbyItem } from '@/types/hobby';
+import type { GameTelemetryStatus } from '@/types/game';
 import type {
   RAGDocument,
   RAGIngestPayload,
@@ -332,6 +333,26 @@ export const apiService = {
       onComplete();
     } catch (err) {
       onError(err);
+    }
+  },
+
+  /**
+   * Retrieves active or recent game telemetry from Steam Web API or Discord RPC webhook.
+   * Gracefully returns null when status is HTTP 204 (No Content / Idle) or backend is unreachable.
+   */
+  async getActiveGame(): Promise<GameTelemetryStatus | null> {
+    try {
+      // Backend routes are mounted under both /api and /api/v1
+      const url = BASE_URL.includes('/api/v1')
+        ? `${BASE_URL}/consuming/games`
+        : `${BASE_URL}/api/consuming/games`;
+      const response = await fetch(url);
+      if (response.status === 204 || !response.ok) {
+        return null;
+      }
+      return await response.json();
+    } catch {
+      return null;
     }
   },
 };
