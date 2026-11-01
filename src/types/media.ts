@@ -9,6 +9,9 @@ export interface ReadingItem {
   coverUrl: string;
   referenceUrl: string;
   status: string;
+  currentPage?: number;
+  totalPages?: number;
+  progressPercentage?: number;
 }
 
 /**
@@ -23,9 +26,22 @@ export interface WatchingItem {
 }
 
 /**
+ * Contract representing the active video game card in the consuming section.
+ */
+export interface GamingItem {
+  id: string;
+  title: string;
+  platform: string;
+  status: string;
+  coverUrl: string;
+  hoursPlayed?: number;
+}
+
+/**
  * Aggregated consumed media model supporting dynamic management.
  */
 export interface ConsumedMedia {
   reading: ReadingItem;
   watching: WatchingItem;
+  gaming?: GamingItem;
 }

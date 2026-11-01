@@ -5,6 +5,7 @@ import { Footer } from '@/components/common/Footer';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { AboutMeSection } from '@/components/sections/AboutMeSection';
 import { WhatIDoSection } from '@/components/sections/WhatIDoSection';
+import { HowIWorkSection } from '@/components/sections/HowIWorkSection';
 import { CurrentlyConsumingSection } from '@/components/sections/CurrentlyConsumingSection';
 import { InterestsSection } from '@/components/sections/InterestsSection';
 import { WishlistSection } from '@/components/sections/WishlistSection';
@@ -109,6 +110,7 @@ export const App: React.FC = () => {
           <HeroSection />
           <AboutMeSection />
           <WhatIDoSection />
+          <HowIWorkSection />
           <CurrentlyConsumingSection />
           <InterestsSection />
           <WishlistSection />

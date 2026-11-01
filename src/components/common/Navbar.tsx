@@ -19,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) =
   const navLinks = [
     { label: 'Sobre mim', href: '#sobre' },
     { label: 'O Que Faço', href: '#projetos' },
+    { label: 'How I Work', href: '#how-i-work' },
     { label: 'Consumindo', href: '#consumindo' },
     { label: 'Gostos', href: '#gostos' },
     { label: 'Wishlist', href: '#wishlist' },

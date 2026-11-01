@@ -149,6 +149,9 @@ export const apiService = {
         coverUrl: data.reading.cover_url,
         referenceUrl: data.reading.reference_url,
         status: data.reading.status,
+        currentPage: data.reading.current_page ?? 184,
+        totalPages: data.reading.total_pages ?? 260,
+        progressPercentage: data.reading.progress_percentage ?? 71,
       },
       watching: {
         id: 'watching-1',
@@ -157,7 +160,56 @@ export const apiService = {
         coverUrl: data.watching.cover_url,
         category: data.watching.category,
       },
+      gaming: data.gaming
+        ? {
+            id: 'gaming-1',
+            title: data.gaming.title,
+            platform: data.gaming.platform,
+            status: data.gaming.status,
+            coverUrl: data.gaming.cover_url,
+            hoursPlayed: data.gaming.hours_played,
+          }
+        : undefined,
     };
+  },
+
+  async updateReadingProgress(currentPage: number, totalPages?: number): Promise<ConsumedMedia> {
+    const res = await fetch(`${BASE_URL}/media/reading/progress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_page: currentPage, total_pages: totalPages }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await this.getMedia();
+  },
+
+  async updateGamingStatus(payload: {
+    title: string;
+    platform?: string;
+    status?: string;
+    coverUrl?: string;
+    hoursPlayed?: number;
+  }): Promise<ConsumedMedia> {
+    const res = await fetch(`${BASE_URL}/media/gaming/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: payload.title,
+        platform: payload.platform,
+        status: payload.status,
+        cover_url: payload.coverUrl,
+        hours_played: payload.hoursPlayed,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await this.getMedia();
+  },
+
+  // Newsletter Elyy.init
+  async getNewsletterArticles(): Promise<any[]> {
+    const res = await fetch(`${BASE_URL}/newsletter/articles`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
   },
 
   // Hobbies / Interests
