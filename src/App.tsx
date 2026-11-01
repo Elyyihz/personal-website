@@ -96,6 +96,18 @@ export const App: React.FC = () => {
     return <SpotifyCallbackHandler />;
   }
 
+  // When Terminal Mode is active via shortcut or UI trigger, hide the main DOM
+  // and render full macOS Zsh terminal emulation
+  if (isTerminalOpen) {
+    return (
+      <MacTerminal
+        isOpen={true}
+        isTakeover={true}
+        onClose={() => setIsTerminalOpen(false)}
+      />
+    );
+  }
+
   return (
     <DataProvider>
       <div className="min-h-screen bg-brand-deep text-brand-text flex flex-col font-sans selection:bg-brand-primary selection:text-white">
