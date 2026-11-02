@@ -15,9 +15,27 @@ import type {
   ChatQueryResponse,
 } from '@/types/rag';
 
-const BASE_URL =
-  (import.meta.env.VITE_BACKEND_API_URL as string | undefined) ||
-  'http://localhost:8000/api/v1';
+/**
+ * Resolves the standardized API base endpoint ensuring versioned path (/api/v1).
+ * Resiliently handles variations like "http://localhost:8000", "http://localhost:8000/api", or relative paths.
+ */
+function normalizeApiUrl(rawUrl?: string): string {
+  if (!rawUrl || rawUrl.trim() === '') {
+    return 'http://localhost:8000/api/v1';
+  }
+  const clean = rawUrl.trim().replace(/\/+$/, '');
+  if (clean.endsWith('/api/v1')) {
+    return clean;
+  }
+  if (clean.endsWith('/api')) {
+    return `${clean}/v1`;
+  }
+  return `${clean}/api/v1`;
+}
+
+const BASE_URL = normalizeApiUrl(
+  import.meta.env.VITE_BACKEND_API_URL as string | undefined
+);
 
 /**
  * Extracts human-readable error messages from failed response payloads.
@@ -409,11 +427,7 @@ export const apiService = {
    */
   async getActiveGame(): Promise<GameTelemetryStatus | null> {
     try {
-      // Backend routes are mounted under both /api and /api/v1
-      const url = BASE_URL.includes('/api/v1')
-        ? `${BASE_URL}/consuming/games`
-        : `${BASE_URL}/api/consuming/games`;
-      const response = await fetch(url);
+      const response = await fetch(`${BASE_URL}/consuming/games`);
       if (response.status === 204 || !response.ok) {
         return null;
       }

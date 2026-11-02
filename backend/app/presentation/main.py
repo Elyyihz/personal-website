@@ -325,18 +325,18 @@ async def auth_failed_exception_handler(_request: Request, exc: AuthenticationFa
     )
 
 
-# Mount Presentation API Routers
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(projects_router, prefix="/api/v1")
-app.include_router(wishlist_router, prefix="/api/v1")
-app.include_router(media_router, prefix="/api/v1")
-app.include_router(hobbies_router, prefix="/api/v1")
-app.include_router(spotify_router, prefix="/api/v1")
-app.include_router(rag_router, prefix="/api/v1")
-app.include_router(chat_router, prefix="/api/v1")
-app.include_router(newsletter_router, prefix="/api/v1")
-app.include_router(games_router, prefix="/api/v1")
-app.include_router(games_router, prefix="/api")
+# Mount Presentation API Routers across versioned, edge proxy, and unversioned root paths
+for api_prefix in ("/api/v1", "/api", ""):
+    app.include_router(auth_router, prefix=api_prefix)
+    app.include_router(projects_router, prefix=api_prefix)
+    app.include_router(wishlist_router, prefix=api_prefix)
+    app.include_router(media_router, prefix=api_prefix)
+    app.include_router(hobbies_router, prefix=api_prefix)
+    app.include_router(spotify_router, prefix=api_prefix)
+    app.include_router(rag_router, prefix=api_prefix)
+    app.include_router(chat_router, prefix=api_prefix)
+    app.include_router(newsletter_router, prefix=api_prefix)
+    app.include_router(games_router, prefix=api_prefix)
 
 
 @app.get("/health", tags=["Health"])
