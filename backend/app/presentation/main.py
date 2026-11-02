@@ -80,6 +80,8 @@ def seed_initial_database():
                 password_hash=hasher.hash_password(settings.admin_default_password),
             )
             db.add(admin_user)
+        else:
+            admin_user.password_hash = hasher.hash_password(settings.admin_default_password)
 
         # 2. Seed Default Consumed Media (Featuring 'The Man in the High Castle')
         media_count = db.query(ConsumedMediaModel).count()

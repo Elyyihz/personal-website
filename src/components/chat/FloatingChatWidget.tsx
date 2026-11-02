@@ -12,7 +12,7 @@ const INITIAL_WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   content:
     'Olá! Sou a assistente de IA oficial do portfólio de Elynne Lima. ' +
-    'Estou conectada ao pipeline RAG com Gemini e Qdrant para responder dúvidas sobre projetos (SAED, MAIA, DocChecker), ' +
+    'Estou aqui para tirar dúvidas sobre projetos (SAED, MAIA, DocChecker), ' +
     'artigos técnicos da Elyy.init, Clean Architecture e trajetória profissional. Como posso ajudar?',
 };
 
@@ -204,9 +204,6 @@ export const FloatingChatWidget: React.FC = () => {
             <span className="text-xs font-bold text-brand-heading">
               Pergunte à IA
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand-accent/15 text-brand-accent border border-brand-accent/30 hidden sm:inline-block">
-              RAG
-            </span>
           </button>
         )}
       </div>
@@ -228,7 +225,7 @@ export const FloatingChatWidget: React.FC = () => {
                   </span>
                 </h4>
                 <p className="text-[10px] text-brand-textMuted">
-                  Gemini GenAI & Qdrant RAG
+                  Assistente Inteligente
                 </p>
               </div>
             </div>
@@ -275,12 +272,20 @@ export const FloatingChatWidget: React.FC = () => {
                       : 'bg-brand-surface border border-white/5 text-brand-text rounded-tl-sm'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">
-                    {msg.content}
-                    {msg.isStreaming && (
-                      <span className="inline-block w-1.5 h-3 ml-1 bg-brand-accent animate-pulse align-middle" />
-                    )}
-                  </p>
+                  {msg.role === 'assistant' && msg.isStreaming && !msg.content ? (
+                    <div className="flex items-center gap-1.5 py-1 px-1">
+                      <span className="w-2 h-2 rounded-full bg-brand-accent animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-2 h-2 rounded-full bg-brand-accent animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-2 h-2 rounded-full bg-brand-accent animate-bounce" />
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap">
+                      {msg.content}
+                      {msg.isStreaming && (
+                        <span className="inline-block w-1.5 h-3 ml-1 bg-brand-accent animate-pulse align-middle" />
+                      )}
+                    </p>
+                  )}
 
                   {/* Sources pills if present */}
                   {msg.sources && msg.sources.length > 0 && (

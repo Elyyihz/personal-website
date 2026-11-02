@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { SectionHeading } from '@/components/common/SectionHeading';
 import { MailIcon, GithubIcon, LinkedinIcon, ExternalLinkIcon } from '@/components/icons';
-import { profileData } from '@/data/profileData';
+import { useData } from '@/context/DataContext';
 
 /**
  * Contacts section providing direct communication channels, GitHub, LinkedIn, and email clipboard.
  */
 export const ContactsSection: React.FC = () => {
+  const { profile } = useData();
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const rawEmail = 'elynnelima@gmail.com';
+  const rawEmail = profile.socials.email.replace(/^mailto:/, '') || 'elynnelima@gmail.com';
 
   const copyEmailToClipboard = () => {
     void navigator.clipboard.writeText(rawEmail);
@@ -21,23 +22,23 @@ export const ContactsSection: React.FC = () => {
     {
       title: 'Email Direto',
       detail: rawEmail,
-      href: profileData.socials.email,
+      href: profile.socials.email,
       icon: <MailIcon className="w-5 h-5" />,
       actionText: copiedEmail ? 'Copiado para o clipboard!' : 'Copiar ou Enviar',
       onAction: copyEmailToClipboard,
     },
     {
       title: 'GitHub',
-      detail: 'github.com/Elyyihz',
-      href: profileData.socials.github,
+      detail: profile.socials.github.replace(/^https?:\/\//, ''),
+      href: profile.socials.github,
       icon: <GithubIcon className="w-5 h-5" />,
       actionText: 'Visitar Perfil',
       isExternal: true,
     },
     {
       title: 'LinkedIn',
-      detail: 'linkedin.com/in/elynnelima',
-      href: profileData.socials.linkedin,
+      detail: profile.socials.linkedin.replace(/^https?:\/\//, ''),
+      href: profile.socials.linkedin,
       icon: <LinkedinIcon className="w-5 h-5" />,
       actionText: 'Conectar',
       isExternal: true,

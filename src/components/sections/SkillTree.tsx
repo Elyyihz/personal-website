@@ -36,23 +36,23 @@ export interface SkillBranch {
 const SKILL_BRANCHES: SkillBranch[] = [
   {
     id: 'backend',
-    name: 'Backend Magic',
-    archetype: 'Architect Mage',
-    description: 'High-performance microservices, Clean Architecture, and domain-driven distributed systems.',
+    name: 'Magia de Backend',
+    archetype: 'Mago Arquiteto',
+    description: 'Microsserviços de alta performance, Clean Architecture e sistemas distribuídos orientados a domínio.',
     icon: <WandIcon className="w-5 h-5" />,
     nodes: [
       {
         id: 'py-core',
-        name: 'Python Mastery',
+        name: 'Domínio de Python',
         level: 99,
         maxLevel: 99,
         tier: 1,
         category: 'backend',
-        tagline: 'Root Affinity: AsyncIO, Metaprogramming & Type Safety',
-        description: 'Deep mastery of asynchronous runtime, memory profiling, and high-throughput concurrent patterns.',
+        tagline: 'Afinidade Raiz: AsyncIO, Metaprogramação & Tipagem Estrita',
+        description: 'Domínio avançado de runtime assíncrono, análise de consumo de memória e padrões concorrentes de alta vazão.',
         stats: [
-          { label: 'Latency', value: '< 15ms p99' },
-          { label: 'Type Rigor', value: 'Strict MyPy' },
+          { label: 'Latência', value: '< 15ms p99' },
+          { label: 'Rigor de Tipagem', value: 'MyPy Estrito' },
         ],
         unlocked: true,
         projects: ['SAED', 'DocChecker', 'MAIA'],
@@ -64,10 +64,10 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 2,
         category: 'backend',
-        tagline: 'Spell: High-Throughput HTTP & Streaming RPC',
-        description: 'Reactive endpoints, dependency injection graphs, streaming responses, and OpenAPI orchestration.',
+        tagline: 'Habilidade: HTTP de Alta Vazão & Streaming RPC',
+        description: 'Endpoints reativos, grafos de injeção de dependências, respostas em streaming e orquestração OpenAPI.',
         stats: [
-          { label: 'Throughput', value: '4.8k req/sec' },
+          { label: 'Vazão', value: '4.8k req/seg' },
           { label: 'Streaming', value: 'SSE & WebSocket' },
         ],
         unlocked: true,
@@ -80,11 +80,11 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 3,
         category: 'backend',
-        tagline: 'Passive: Decoupled Domain Invariants',
-        description: 'Strict boundary enforcement between entities, use cases, repository ports, and web delivery adapters.',
+        tagline: 'Passiva: Invariantes de Domínio Desacopladas',
+        description: 'Isolamento estrito entre entidades de domínio, casos de uso, portas de repositório e adaptadores web.',
         stats: [
-          { label: 'Coupling', value: 'Zero Leaks' },
-          { label: 'Test Coverage', value: '98% Unit' },
+          { label: 'Acoplamento', value: 'Vazamento Zero' },
+          { label: 'Cobertura de Testes', value: '98% Unitário' },
         ],
         unlocked: true,
         projects: ['MAIA', 'SAED'],
@@ -96,11 +96,11 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 4,
         category: 'backend',
-        tagline: 'Spell: Query Optimization & Transaction Locks',
-        description: 'Relational data modeling, connection pool management, and optimized indexing strategies.',
+        tagline: 'Habilidade: Otimização de Consultas & Locks Transacionais',
+        description: 'Modelagem de dados relacionais, gerenciamento de pool de conexões e estratégias otimizadas de indexação.',
         stats: [
-          { label: 'Pool Safety', value: 'Pre-ping Enabled' },
-          { label: 'Migrations', value: 'Alembic Managed' },
+          { label: 'Segurança de Pool', value: 'Pre-ping Ativo' },
+          { label: 'Migrações', value: 'Gerenciadas por Alembic' },
         ],
         unlocked: true,
         projects: ['Portfolio Microservice', 'SAED'],
@@ -109,23 +109,23 @@ const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'ai',
-    name: 'AI & Data Engineering',
-    archetype: 'Neural Weaver',
-    description: 'Graph-based agentic workflows, semantic vector retrieval, and vision intelligence.',
+    name: 'IA & Engenharia de Dados',
+    archetype: 'Tecelã Neural',
+    description: 'Fluxos de trabalho multi-agente em grafo, recuperação vetorial semântica e inteligência visual.',
     icon: <SparklesIcon className="w-5 h-5" />,
     nodes: [
       {
         id: 'agentic-ai',
-        name: 'Agentic AI & LangGraph',
+        name: 'IA Agêntica & LangGraph',
         level: 96,
         maxLevel: 99,
         tier: 1,
         category: 'ai',
-        tagline: 'Root Affinity: Stateful Cyclical Workflows',
-        description: 'Building multi-agent state machines with conditional routing, self-reflection, and fault-tolerant graphs.',
+        tagline: 'Afinidade Raiz: Fluxos Cíclicos Baseados em Estado',
+        description: 'Construção de máquinas de estado multi-agente com roteamento condicional, auto-reflexão e grafos tolerantes a falhas.',
         stats: [
-          { label: 'Coordination', value: 'Multi-Agent Mesh' },
-          { label: 'Checkpointing', value: 'PostgreSQL / Memory' },
+          { label: 'Coordenação', value: 'Malha Multi-Agente' },
+          { label: 'Persistência de Estado', value: 'PostgreSQL / Memória' },
         ],
         unlocked: true,
         projects: ['MAIA', 'DocChecker'],
@@ -137,11 +137,11 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 2,
         category: 'ai',
-        tagline: 'Spell: High-Dimensional Semantic Search',
-        description: 'HNSW vector indexing, distance metrics tuning, and filtered hybrid retrieval strategies.',
+        tagline: 'Habilidade: Busca Semântica em Alta Dimensão',
+        description: 'Indexação vetorial HNSW, calibração de métricas de distância e estratégias de recuperação híbrida com filtros.',
         stats: [
-          { label: 'Dimensions', value: '768 - 1536d' },
-          { label: 'Recall Rate', value: '99.4%' },
+          { label: 'Dimensões', value: '768 - 1536d' },
+          { label: 'Taxa de Relevância', value: '99.4%' },
         ],
         unlocked: true,
         projects: ['DocChecker', 'AI Assistant'],
@@ -153,27 +153,27 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 3,
         category: 'ai',
-        tagline: 'Passive: Visual Tokenizer & Structure Parser',
-        description: 'Real-time object bounding, document table segmentation, and OCR layout reconstruction.',
+        tagline: 'Passiva: Tokenizador Visual & Parser Estrutural',
+        description: 'Delimitação de objetos em tempo real, segmentação de tabelas em documentos e reconstrução de layout via OCR.',
         stats: [
-          { label: 'Inference', value: 'Real-time TensorRT' },
-          { label: 'Extraction', value: '96.8% Accuracy' },
+          { label: 'Inferência', value: 'Tempo Real (TensorRT)' },
+          { label: 'Extração', value: '96.8% de Precisão' },
         ],
         unlocked: true,
         projects: ['SAED', 'DocChecker'],
       },
       {
         id: 'rag-eval',
-        name: 'RAG Pipeline & LLMs',
+        name: 'Pipelines de RAG & LLMs',
         level: 95,
         maxLevel: 99,
         tier: 4,
         category: 'ai',
-        tagline: 'Spell: Grounded Context Synthesis',
-        description: 'Context-window compression, chunk overlapping, and Hallucination-free answer generation.',
+        tagline: 'Habilidade: Síntese Aterrada de Contexto',
+        description: 'Compressão de janela de contexto, sobreposição de chunks e geração de respostas livres de alucinação.',
         stats: [
-          { label: 'Hallucination', value: '< 1%' },
-          { label: 'Embedding Engine', value: 'Gemini / OpenAI' },
+          { label: 'Alucinação', value: '< 1%' },
+          { label: 'Motor de Embeddings', value: 'Gemini / OpenAI' },
         ],
         unlocked: true,
         projects: ['AI Assistant', 'DocChecker'],
@@ -182,9 +182,9 @@ const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'infra',
-    name: 'Infrastructure & SRE',
-    archetype: 'Iron Guardian',
-    description: 'Resilient container orchestration, asynchronous message queues, and production telemetry.',
+    name: 'Infraestrutura & SRE',
+    archetype: 'Guardiã de Ferro',
+    description: 'Orquestração resiliente de contêineres, filas assíncronas de mensagens e telemetria de produção.',
     icon: <HexagonIcon className="w-5 h-5" />,
     nodes: [
       {
@@ -194,11 +194,11 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 1,
         category: 'infra',
-        tagline: 'Root Affinity: Unix Philosophy & Automation',
-        description: 'POSIX compliance, shell scripting, environment isolation, process management, and kernel parameters.',
+        tagline: 'Afinidade Raiz: Filosofia Unix & Automação',
+        description: 'Conformidade POSIX, automação via shell script, isolamento de ambientes, gestão de processos e tuning de kernel.',
         stats: [
-          { label: 'CLI Fluency', value: 'Automated Tooling' },
-          { label: 'OS Targets', value: 'Alpine / Debian / Darwin' },
+          { label: 'Fluência CLI', value: 'Ferramental Automatizado' },
+          { label: 'Ambientes Alvo', value: 'Alpine / Debian / Darwin' },
         ],
         unlocked: true,
         projects: ['Infrastructure Scripts', 'Terminal Mode'],
@@ -210,43 +210,43 @@ const SKILL_BRANCHES: SkillBranch[] = [
         maxLevel: 99,
         tier: 2,
         category: 'infra',
-        tagline: 'Spell: Multi-Stage Containerization',
-        description: 'Minimal rootless container builds, volume persistence, network bridges, and orchestration.',
+        tagline: 'Habilidade: Conteinerização Multi-Stage',
+        description: 'Builds mínimos rootless, persistência de volumes, bridges de rede e orquestração declarativa.',
         stats: [
-          { label: 'Image Size', value: '< 85MB Alpine' },
-          { label: 'Security', value: 'Non-root Runtime' },
+          { label: 'Tamanho da Imagem', value: '< 85MB Alpine' },
+          { label: 'Segurança', value: 'Execução Sem Root' },
         ],
         unlocked: true,
         projects: ['Full Portfolio Stack', 'SAED'],
       },
       {
         id: 'rabbitmq',
-        name: 'RabbitMQ & Queues',
+        name: 'RabbitMQ & Filas',
         level: 89,
         maxLevel: 99,
         tier: 3,
         category: 'infra',
-        tagline: 'Passive: Guaranteed Delivery Streams',
-        description: 'Topic exchanges, dead-letter routing, backpressure mitigation, and durable task queues.',
+        tagline: 'Passiva: Fluxos com Entrega Garantida',
+        description: 'Exchanges de tópicos, roteamento dead-letter, controle de backpressure e filas de tarefas duráveis.',
         stats: [
-          { label: 'Reliability', value: 'At-least-once Ack' },
-          { label: 'Topology', value: 'Direct & Fanout' },
+          { label: 'Confiabilidade', value: 'Confirmação At-least-once' },
+          { label: 'Topologia', value: 'Direct & Fanout' },
         ],
         unlocked: true,
         projects: ['Distributed Pipeline', 'MAIA'],
       },
       {
         id: 'observability',
-        name: 'OpenTelemetry & Metrics',
+        name: 'OpenTelemetry & Métricas',
         level: 87,
         maxLevel: 99,
         tier: 4,
         category: 'infra',
-        tagline: 'Spell: Distributed Tracing & Health Probes',
-        description: 'End-to-end span propagation, Prometheus metrics exports, and structured JSON telemetry.',
+        tagline: 'Habilidade: Rastreamento Distribuído & Sondagens de Saúde',
+        description: 'Propagação de spans ponta a ponta, exportação de métricas Prometheus e telemetria estruturada em JSON.',
         stats: [
-          { label: 'Span Context', value: 'W3C TraceContext' },
-          { label: 'Alerting', value: 'SLA Monitoring' },
+          { label: 'Contexto de Span', value: 'W3C TraceContext' },
+          { label: 'Alertas', value: 'Monitoramento de SLA' },
         ],
         unlocked: true,
         projects: ['Telemetry Anomaly Agent'],
@@ -257,7 +257,7 @@ const SKILL_BRANCHES: SkillBranch[] = [
 
 /**
  * Interactive RPG-style Skill Tree component.
- * Allows users to inspect skill trees across Backend Magic, AI & Data Engineering, and Infrastructure.
+ * Allows users to inspect skill trees across Magia de Backend, IA & Engenharia de Dados, and Infraestrutura.
  */
 export const SkillTree: React.FC = () => {
   const [activeBranchId, setActiveBranchId] = useState<'backend' | 'ai' | 'infra'>('backend');
@@ -273,14 +273,14 @@ export const SkillTree: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-brand-accent px-2 py-0.5 rounded bg-brand-accent/10 border border-brand-accent/25">
-              RPG Talent Tree
+              Árvore de Talentos RPG
             </span>
             <span className="text-xs text-brand-textMuted font-mono">
-              Build: Full-Stack AI Engineer
+              Especialidade: Engenheira de Sistemas de IA
             </span>
           </div>
           <h3 className="text-2xl font-extrabold text-brand-heading mt-1">
-            Árvore de Habilidades & Tecnologias
+            Árvore de Habilidades &amp; Tecnologias
           </h3>
           <p className="text-xs sm:text-sm text-brand-textMuted mt-0.5">
             Selecione uma especialização para visualizar as conexões da árvore de talentos.
@@ -323,7 +323,7 @@ export const SkillTree: React.FC = () => {
             <span className="text-cyan-400 font-bold tracking-wider">
               {activeBranch.archetype.toUpperCase()}
             </span>
-            <span>Progresso da Ramo: 4 / 4 Habilidades Dominadas</span>
+            <span>Progresso da Especialização: 4 de 4 Habilidades Dominadas</span>
           </div>
 
           {/* Interactive RPG Node Tree with SVG Connection Curves */}
@@ -388,7 +388,7 @@ export const SkillTree: React.FC = () => {
                       }`}
                     >
                       <span className="text-[9px] uppercase tracking-tighter text-slate-400">
-                        Tier {node.tier}
+                        Grau {node.tier}
                       </span>
                       <span className="text-sm font-black text-cyan-400">
                         {node.level}
@@ -406,7 +406,7 @@ export const SkillTree: React.FC = () => {
                           {node.name}
                         </h4>
                         <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-950/60 border border-cyan-400/30 text-cyan-400">
-                          MAX
+                          MÁX
                         </span>
                       </div>
                       <p className="text-xs text-brand-textMuted truncate">
@@ -437,7 +437,7 @@ export const SkillTree: React.FC = () => {
                 {activeBranch.archetype}
               </span>
               <span className="text-xs font-mono text-slate-400">
-                Status: Mastery Ativa
+                Status: Maestria Ativa
               </span>
             </div>
 
@@ -457,7 +457,7 @@ export const SkillTree: React.FC = () => {
             {/* Key Skill Modifiers / Attributes */}
             <div className="space-y-2 mb-5">
               <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
-                Métricas & Atributos de Engenharia
+                Métricas &amp; Atributos de Engenharia
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 {selectedNode.stats.map((stat, i) => (
@@ -491,7 +491,7 @@ export const SkillTree: React.FC = () => {
           </div>
 
           <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Ramo de Habilidade: {activeBranch.name}</span>
+            <span>Trilha de Habilidade: {activeBranch.name}</span>
             <span className="text-cyan-400 font-bold">Nível {selectedNode.level}</span>
           </div>
         </div>

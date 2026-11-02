@@ -8,7 +8,9 @@ import {
   HeartIcon,
   RefreshIcon,
   SparklesIcon,
+  UserIcon,
 } from '@/components/icons';
+import { ProfileManager } from './ProfileManager';
 import { ProjectsManager } from './ProjectsManager';
 import { WishlistManager } from './WishlistManager';
 import { MediaManager } from './MediaManager';
@@ -22,7 +24,7 @@ export interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'projects' | 'wishlist' | 'media' | 'hobbies' | 'rag';
+type AdminTab = 'profile' | 'projects' | 'wishlist' | 'media' | 'hobbies' | 'rag';
 
 /**
  * Admin Dashboard root modal component providing full CRUD for projects, wishlist, and consumed media.
@@ -34,7 +36,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onLogout,
 }) => {
   const { resetToDefaults } = useData();
-  const [activeTab, setActiveTab] = useState<AdminTab>('projects');
+  const [activeTab, setActiveTab] = useState<AdminTab>('profile');
   const [confirmReset, setConfirmReset] = useState(false);
 
   if (!isOpen) {
@@ -47,6 +49,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
+    {
+      id: 'profile',
+      label: 'Sobre Mim & Perfil',
+      icon: <UserIcon className="w-4 h-4" />,
+    },
     {
       id: 'projects',
       label: 'Projetos',
@@ -168,6 +175,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* Active Tab Panel Content */}
         <div className="flex-1 p-6 overflow-y-auto">
+          {activeTab === 'profile' && <ProfileManager />}
           {activeTab === 'projects' && <ProjectsManager />}
           {activeTab === 'wishlist' && <WishlistManager />}
           {activeTab === 'media' && <MediaManager />}

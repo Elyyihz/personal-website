@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DataProvider } from '@/context/DataContext';
 import { Navbar } from '@/components/common/Navbar';
 import { Footer } from '@/components/common/Footer';
 import { HeroSection } from '@/components/sections/HeroSection';
 import { AboutMeSection } from '@/components/sections/AboutMeSection';
-import { WhatIDoSection } from '@/components/sections/WhatIDoSection';
-import { HowIWorkSection } from '@/components/sections/HowIWorkSection';
 import { CurrentlyConsumingSection } from '@/components/sections/CurrentlyConsumingSection';
-import { InterestsSection } from '@/components/sections/InterestsSection';
+import { WhatIDoSection } from '@/components/sections/WhatIDoSection';
+import { NewsletterSection } from '@/components/sections/NewsletterSection';
+import { HowIWorkSection } from '@/components/sections/HowIWorkSection';
 import { WishlistSection } from '@/components/sections/WishlistSection';
 import { ContactsSection } from '@/components/sections/ContactsSection';
 import { AdminAuthModal } from '@/components/admin/AdminAuthModal';
@@ -38,13 +38,13 @@ export const App: React.FC = () => {
   /**
    * Evaluates authentication status when opening the admin center.
    */
-  const handleOpenAdmin = () => {
+  const handleOpenAdmin = useCallback(() => {
     if (isAuthenticated) {
       setIsAdminDashboardOpen(true);
     } else {
       setIsAuthModalOpen(true);
     }
-  };
+  }, [isAuthenticated]);
 
   const handleAuthenticated = () => {
     setIsAuthenticated(true);
@@ -61,12 +61,13 @@ export const App: React.FC = () => {
     setIsAdminDashboardOpen(false);
   };
 
-  // Keyboard shortcut listener:
+  // Keyboard shortcut & hidden route listener:
   // - Ctrl+Shift+A or Cmd+Shift+A opens admin
+  // - URL hash #admin, /admin, ?admin=true opens admin
   // - Ctrl+` or Cmd+` or Ctrl+Shift+T toggles macOS Terminal mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Admin dashboard shortcut
+      // Admin dashboard shortcut (Ctrl+Shift+A or Cmd+Shift+A)
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         handleOpenAdmin();
@@ -83,16 +84,34 @@ export const App: React.FC = () => {
       }
     };
 
-    // Check URL hash for direct #admin or #terminal route
-    if (window.location.hash === '#admin') {
-      handleOpenAdmin();
-    } else if (window.location.hash === '#terminal') {
-      setIsTerminalOpen(true);
-    }
+    // Secret route check
+    const evaluateHiddenRoutes = () => {
+      const hash = window.location.hash.toLowerCase();
+      const path = window.location.pathname.toLowerCase();
+      const search = window.location.search.toLowerCase();
+
+      if (
+        hash === '#admin' ||
+        hash === '#painel' ||
+        path === '/admin' ||
+        search.includes('admin=true')
+      ) {
+        handleOpenAdmin();
+      } else if (hash === '#terminal') {
+        setIsTerminalOpen(true);
+      }
+    };
+
+    evaluateHiddenRoutes();
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAuthenticated]);
+    window.addEventListener('hashchange', evaluateHiddenRoutes);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', evaluateHiddenRoutes);
+    };
+  }, [handleOpenAdmin]);
 
   if (isSpotifyCallback) {
     return <SpotifyCallbackHandler />;
@@ -115,25 +134,38 @@ export const App: React.FC = () => {
       <div className="min-h-screen bg-brand-deep text-brand-text flex flex-col font-sans selection:bg-brand-primary selection:text-white">
         {/* Top Navigation */}
         <Navbar
-          onOpenAdmin={handleOpenAdmin}
           onOpenTerminal={() => setIsTerminalOpen(true)}
         />
 
         {/* Main Semantic Layout */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-8 md:space-y-12">
+          {/* 1. Hero & Apresentação */}
           <HeroSection />
+
+          {/* 2. Sobre mim (com Gostos & Hobbies integrados) */}
           <AboutMeSection />
-          <WhatIDoSection />
-          <HowIWorkSection />
+
+          {/* 3. Consumindo (Currently Consuming / Live Telemetry) */}
           <CurrentlyConsumingSection />
-          <InterestsSection />
+
+          {/* 4. O que eu faço (Projetos & Skill Tree) */}
+          <WhatIDoSection />
+
+          {/* 5. Alguns artigos da newsletter (Elyy.init) */}
+          <NewsletterSection />
+
+          {/* 6. Como eu faço (How I Work: Clean Arch, DDD, Code Review) */}
+          <HowIWorkSection />
+
+          {/* 7. Minha Wishlist */}
           <WishlistSection />
+
+          {/* 8. Contato */}
           <ContactsSection />
         </main>
 
         {/* Semantic Footer */}
         <Footer
-          onOpenAdmin={handleOpenAdmin}
           onOpenTerminal={() => setIsTerminalOpen(true)}
         />
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MailIcon, LockIcon, TerminalIcon } from '@/components/icons';
+import { MailIcon, TerminalIcon } from '@/components/icons';
 
 export interface NavbarProps {
   onOpenAdmin?: () => void;
@@ -8,8 +8,10 @@ export interface NavbarProps {
 
 /**
  * Fixed top navigation bar with blur effect and semantic section anchors.
+ * Admin entrance is completely hidden from visible buttons, accessible solely via
+ * keyboard shortcut (Ctrl+Shift+A / Cmd+Shift+A) or confidential routing parameters.
  */
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenTerminal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -18,10 +20,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) =
 
   const navLinks = [
     { label: 'Sobre mim', href: '#sobre' },
-    { label: 'O Que Faço', href: '#projetos' },
-    { label: 'How I Work', href: '#how-i-work' },
     { label: 'Consumindo', href: '#consumindo' },
-    { label: 'Gostos', href: '#gostos' },
+    { label: 'O Que Faço', href: '#projetos' },
+    { label: 'Artigos', href: '#artigos' },
+    { label: 'Como Faço', href: '#how-i-work' },
     { label: 'Wishlist', href: '#wishlist' },
   ];
 
@@ -49,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) =
           ))}
         </div>
 
-        {/* Right CTA and Admin Access Buttons */}
+        {/* Right CTA and Terminal Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {onOpenTerminal && (
             <button
@@ -60,18 +62,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) =
               aria-label="Abrir Terminal Zsh"
             >
               <TerminalIcon className="w-4 h-4" />
-            </button>
-          )}
-
-          {onOpenAdmin && (
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              title="Acessar Painel Administrativo Privado"
-              className="p-2 rounded-lg text-brand-textMuted hover:text-brand-accent hover:bg-brand-surface border border-white/5 transition-all"
-              aria-label="Abrir Painel Administrativo"
-            >
-              <LockIcon className="w-4 h-4" />
             </button>
           )}
 
@@ -143,26 +133,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin, onOpenTerminal }) =
                 <span>Terminal</span>
               </button>
             )}
-            {onOpenAdmin && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  onOpenAdmin();
-                }}
-                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-textMuted hover:text-brand-accent bg-brand-deep border border-brand-accent/20 flex items-center justify-center gap-2"
-              >
-                <LockIcon className="w-3.5 h-3.5" />
-                <span>Painel</span>
-              </button>
-            )}
             <a
               href="#contato"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white transition-all"
+              className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 text-center"
             >
-              <MailIcon className="w-3.5 h-3.5 text-currentColor" />
-              <span>Contato</span>
+              Contato
             </a>
           </div>
         </div>

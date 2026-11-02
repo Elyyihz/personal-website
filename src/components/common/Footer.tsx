@@ -3,11 +3,10 @@ import {
   GithubIcon,
   LinkedinIcon,
   MailIcon,
-  LockIcon,
   TerminalIcon,
   WhiteFlagIcon,
 } from '@/components/icons';
-import { profileData } from '@/data/profileData';
+import { useData } from '@/context/DataContext';
 import { playCozyMelody } from '@/utils/cozyAudio';
 
 export interface FooterProps {
@@ -20,7 +19,8 @@ export interface FooterProps {
  * and the White Flag / Cozy Mode Easter Egg.
  * All icons rendered strictly as inline SVGs using currentColor without emojis.
  */
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenTerminal }) => {
+  const { profile } = useData();
   const currentYear = new Date().getFullYear();
   const [isWaving, setIsWaving] = useState(false);
   const [isCozy, setIsCozy] = useState(() => {
@@ -33,7 +33,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
    * 1. Plays gentle procedural Stardew Valley-inspired chimes.
    * 2. Triggers the physical flag wobble/wave animation.
    * 3. Dispatches global event and toggles Cozy Mode class on the document root.
-   * 4. Displays a friendly, welcoming toast notification.
+   * 4. Displays a friendly, welcoming toast notification positioned at top center.
    */
   const handleWhiteFlagClick = () => {
     // 1. Trigger wave animation
@@ -71,14 +71,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
 
   return (
     <footer className="border-t border-brand-accent/15 bg-brand-surface/70 backdrop-blur-sm mt-10 md:mt-12 relative">
-      {/* Friendly White Flag Toast Notification */}
+      {/* Friendly White Flag Toast Notification - Positioned at top-center so chat widget never obstructs it */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 animate-bounce transition-all">
-          <div className="bg-brand-surface border border-brand-accent/50 text-brand-heading px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-lg">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-md w-full px-4 animate-fadeIn transition-all pointer-events-none">
+          <div className="bg-brand-surface/95 border border-brand-accent/50 text-brand-heading px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-xl pointer-events-auto">
             <div className="w-8 h-8 rounded-full bg-brand-primary/20 border border-brand-accent/40 flex items-center justify-center text-brand-accent flex-shrink-0">
               <WhiteFlagIcon className="w-4 h-4" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-xs sm:text-sm font-semibold">{toastMessage}</p>
               <p className="text-[10px] text-brand-textMuted font-mono">
                 {isCozy ? 'Cozy Mode Ativo (Tons Terrosos & Pixel Art)' : 'Cyberpunk Cyan Ativo'}
@@ -87,7 +87,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
             <button
               type="button"
               onClick={() => setToastMessage(null)}
-              className="text-brand-textMuted hover:text-white text-xs ml-2 cursor-pointer font-bold"
+              className="text-brand-textMuted hover:text-white text-xs ml-2 cursor-pointer font-bold px-1.5 py-0.5 rounded"
+              aria-label="Fechar notificação"
             >
               x
             </button>
@@ -101,10 +102,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
             href="#"
             className="text-brand-heading font-extrabold text-2xl tracking-tight block mb-1 hover:opacity-90"
           >
-            {profileData.handle}
+            {profile.handle}
             <span className="text-brand-accent">.</span>
           </a>
-          <p className="text-sm text-brand-textMuted">{profileData.role}</p>
+          <p className="text-sm text-brand-textMuted">{profile.role}</p>
         </div>
 
         {/* Social Network Icon Endpoints & Easter Eggs */}
@@ -135,19 +136,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
               <TerminalIcon className="w-5 h-5" />
             </button>
           )}
-          {onOpenAdmin && (
-            <button
-              type="button"
-              onClick={onOpenAdmin}
-              aria-label="Abrir Painel Administrativo"
-              title="Painel Privado"
-              className="w-11 h-11 rounded-xl bg-brand-deep flex items-center justify-center border border-brand-accent/20 text-brand-text hover:text-brand-accent hover:border-brand-accent transition-all hover:scale-105"
-            >
-              <LockIcon className="w-5 h-5" />
-            </button>
-          )}
+
           <a
-            href={profileData.socials.github}
+            href={profile.socials.github}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Perfil do GitHub"
@@ -156,7 +147,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
             <GithubIcon className="w-5 h-5" />
           </a>
           <a
-            href={profileData.socials.linkedin}
+            href={profile.socials.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Perfil do LinkedIn"
@@ -165,7 +156,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
             <LinkedinIcon className="w-5 h-5" />
           </a>
           <a
-            href={profileData.socials.email}
+            href={profile.socials.email}
             aria-label="Enviar Email"
             className="w-11 h-11 rounded-xl bg-brand-deep flex items-center justify-center border border-brand-accent/20 text-brand-text hover:text-brand-accent hover:border-brand-accent transition-all hover:scale-105"
           >
@@ -176,17 +167,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onOpenTerminal }) =
 
       <div className="py-4 text-center text-xs text-brand-textMuted/70 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2">
         <span>
-          &copy; {currentYear} {profileData.name}. Construído com Clean Architecture, React e Tailwind CSS.
+          &copy; {currentYear} {profile.name}. Construído com Clean Architecture, React e Tailwind CSS.
         </span>
-        {onOpenAdmin && (
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="text-[11px] font-mono text-brand-accent hover:underline ml-2"
-          >
-            [Painel Privado]
-          </button>
-        )}
       </div>
     </footer>
   );

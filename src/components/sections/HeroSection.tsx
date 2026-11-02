@@ -1,11 +1,13 @@
 import React from 'react';
 import { SparklesIcon, FolderGitIcon, GiftIcon } from '@/components/icons';
-import { profileData } from '@/data/profileData';
+import { useData } from '@/context/DataContext';
 
 /**
  * Hero section component featuring introductory headline, call-to-actions, and profile avatar.
  */
 export const HeroSection: React.FC = () => {
+  const { profile } = useData();
+
   return (
     <section id="hero" className="pt-24 pb-4 md:pt-32 md:pb-6">
       <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-12">
@@ -21,14 +23,14 @@ export const HeroSection: React.FC = () => {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-brand-heading leading-tight tracking-tight">
             Oi, eu sou a{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent via-cyan-300 to-brand-primary">
-              {profileData.name.split(' ')[0]}
+              {profile.name.split(' ')[0]}
             </span>
             .
           </h1>
 
           {/* Subtitle / Role Overview */}
           <p className="text-lg md:text-xl text-brand-text/90 max-w-xl leading-relaxed">
-            {profileData.role}. {profileData.headline}
+            {profile.role}. {profile.headline}
           </p>
 
           {/* CTA Action Buttons */}
@@ -54,7 +56,7 @@ export const HeroSection: React.FC = () => {
         <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 flex-shrink-0 flex items-center justify-center">
           <img
             src="/memoji.png"
-            alt={`Avatar Memoji de ${profileData.name}`}
+            alt={`Avatar Memoji de ${profile.name}`}
             className="w-full h-full object-contain select-none transition-transform duration-300 hover:scale-105"
           />
         </div>

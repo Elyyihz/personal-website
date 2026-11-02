@@ -3,10 +3,12 @@ import type { Project } from '@/types/project';
 import type { WishlistItem } from '@/types/wishlist';
 import type { ConsumedMedia } from '@/types/media';
 import type { HobbyItem } from '@/types/hobby';
+import type { ProfileInfo } from '@/types/profile';
 import { projectsData as initialProjects } from '@/data/projectsData';
 import { allWishlistData as initialWishlist } from '@/data/wishlistData';
 import { defaultConsumedMedia as initialMedia } from '@/data/mediaData';
 import { defaultHobbiesData as initialHobbies } from '@/data/interestsData';
+import { profileData as initialProfile } from '@/data/profileData';
 import { Logger } from '@/utils/logger';
 
 /**
@@ -18,10 +20,14 @@ const STORAGE_KEY = 'elyyihz_portfolio_dynamic_data_v1';
  * Context state contract exposed to components and admin dashboard.
  */
 export interface DataContextValue {
+  profile: ProfileInfo;
   projects: Project[];
   wishlistItems: WishlistItem[];
   consumedMedia: ConsumedMedia;
   hobbies: HobbyItem[];
+
+  // Profile management operations
+  updateProfile: (updates: Partial<ProfileInfo>) => void;
 
   // Project CRUD operations
   createProject: (project: Omit<Project, 'id'>) => void;
@@ -53,6 +59,18 @@ const DataContext = createContext<DataContextValue | null>(null);
  */
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const logger = new Logger('DataProvider');
+
+  const [profile, setProfile] = useState<ProfileInfo>(() => {
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_profile`);
+      if (saved) {
+        return JSON.parse(saved) as ProfileInfo;
+      }
+    } catch {
+      // Fallback
+    }
+    return initialProfile;
+  });
 
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
@@ -101,6 +119,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     return initialHobbies;
   });
+
+  // Synchronize profile to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${STORAGE_KEY}_profile`, JSON.stringify(profile));
+    } catch (err) {
+      logger.logError('Failed to persist profile to localStorage', err);
+    }
+  }, [profile, logger]);
 
   // Synchronize projects to localStorage
   useEffect(() => {
@@ -247,14 +274,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [logger]
   );
 
+  // Profile Management Action
+  const updateProfile = useCallback(
+    (updates: Partial<ProfileInfo>) => {
+      logger.logStepStart('UpdateProfile', updates);
+      setProfile((prev) => ({
+        ...prev,
+        ...updates,
+        traits: updates.traits || prev.traits,
+        socials: updates.socials ? { ...prev.socials, ...updates.socials } : prev.socials,
+      }));
+      logger.logStepConclusion('UpdateProfile', 'Updated profile information successfully');
+    },
+    [logger]
+  );
+
   // Reset Action
   const resetToDefaults = useCallback(() => {
     logger.logDecision('ResetToDefaults', 'User requested full reset of local storage cache.');
+    setProfile(initialProfile);
     setProjects(initialProjects);
     setWishlistItems(initialWishlist);
     setConsumedMedia(initialMedia);
     setHobbies(initialHobbies);
     try {
+      localStorage.removeItem(`${STORAGE_KEY}_profile`);
       localStorage.removeItem(`${STORAGE_KEY}_projects`);
       localStorage.removeItem(`${STORAGE_KEY}_wishlist`);
       localStorage.removeItem(`${STORAGE_KEY}_media`);
@@ -268,10 +312,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider
       value={{
+        profile,
         projects,
         wishlistItems,
         consumedMedia,
         hobbies,
+        updateProfile,
         createProject,
         updateProject,
         deleteProject,
