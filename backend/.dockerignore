@@ -12,3 +12,7 @@ env
 portfolio.db
 .git
 .gitignore
+.env
+.env.*
+qdrant_storage
+

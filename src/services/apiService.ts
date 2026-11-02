@@ -76,7 +76,7 @@ function getAuthHeader(): Record<string, string> {
  */
 export const apiService = {
   /**
-   * Ensures an authenticated administrative session is active, auto-refreshing if necessary.
+   * Ensures an authenticated administrative session is active from existing tokens.
    */
   async ensureAdminSession(): Promise<string | null> {
     const existing =
@@ -86,12 +86,7 @@ export const apiService = {
       sessionStorage.setItem('ely_jwt_token', existing);
       return existing;
     }
-    try {
-      const data = await this.login('elyyihz', 'admin123');
-      return data.access_token;
-    } catch {
-      return null;
-    }
+    return null;
   },
 
   /**

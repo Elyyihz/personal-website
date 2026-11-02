@@ -116,61 +116,83 @@ Para demonstrar proficiência em engenharia de sistemas e proporcionar uma exper
 
 O painel administrativo privado viabiliza a gestão completa e imediata do conteúdo:
 
-- **Autenticação:** Protegido por modal (`AdminAuthModal`) que autentica via JWT no backend FastAPI ou utiliza fallback seguro em `sessionStorage` (senha: `admin` ou `elyyihz`). Atalho rápido: `Ctrl + Shift + A` (`Cmd + Shift + A`).
+- **Autenticação:** Protegido por modal (`AdminAuthModal`) que autentica via JWT no backend FastAPI ou utiliza sessão segura em `sessionStorage` (senha mestra: `Ely@MatrixArch2026!#`). Atalho rápido: `Ctrl + Shift + A` (`Cmd + Shift + A`).
 - **CRUD de Projetos:** Criação, edição e exclusão de projetos com tags e seleção de ícone SVG.
-- **CRUD da Wishlist:** Suporte explícito ao booleano `is_fulfilled` (item já adquirido / realizado), alternável via botão de confirmação e refletido com badge visual.
-- **Gestão de Consumo de Mídias:** Atualização da leitura ativa (*The Man in the High Castle* de Philip K. Dick) e mídias visuais.
-- **Gestão de Gostos & Hobbies:** Criação e manutenção de afinidades com **Icon Picker** integrado, selecionando slugs salvos no banco a partir do registro local de SVGs inline.
+- **CRUD de Artigos & Newsletter:** Edição de títulos, resumos, tags, links externos e controle seletivo de visibilidade das publicações exibidas no site.
+- **CRUD da Wishlist:** Suporte explícito à paginação e ao booleano `is_fulfilled` (item já adquirido / realizado), alternável via botão de confirmação e refletido com badge visual.
+- **Gestão de Consumo de Mídias:** Atualização da leitura ativa (*The Man in the High Castle* de Philip K. Dick) e status de séries e jogos.
+- **Gestão de Sobre Mim, Gostos & Hobbies:** Criação e manutenção de bio, traços e afinidades em interface unificada com **Icon Picker** integrado, selecionando slugs salvos no banco a partir do registro local de SVGs inline.
+- **Base de Conhecimento RAG:** Ingestão de documentos textuais e sincronização com a base vetorial densa do assistente de IA.
 
 ---
 
-## 6. Como Executar a Aplicação
+## 6. Como Executar e Subir em Produção
 
 ### Pré-requisitos
-- Node.js 18+ e npm
+- Node.js 20+ e npm
 - Python 3.11+
-- Docker e Docker Compose (opcional para ambiente conteinerizado)
+- Docker e Docker Compose
 
-### Execução via Docker Compose (Microsserviço + PostgreSQL)
-```bash
-# Iniciar banco de dados PostgreSQL 16 e microserviço FastAPI
-docker compose up -d --build
+### Opção A: Deploy em Produção com Docker Compose (VPS / Servidor Dedicado)
 
-# Verificar logs da aplicação
-docker compose logs -f backend
-```
+Esta é a opção recomendada para hospedar o ecossistema completo (Frontend Nginx, Backend FastAPI, PostgreSQL e Qdrant) em um único servidor (ex: Ubuntu em Hetzner, DigitalOcean, AWS EC2, Linode):
 
-A documentação interativa Swagger estará acessível em: `http://localhost:8000/docs`.
+1. **Configurar as Variáveis de Ambiente:**
+   Copie o arquivo `.env.example` para `.env` no servidor e preencha as credenciais reais:
+   ```bash
+   cp .env.example .env
+   # Edite o .env configurando JWT_SECRET_KEY, SPOTIFY_*, GEMINI_API_KEY, etc.
+   ```
 
-### Execução Local para Desenvolvimento
+2. **Subir os Contêineres:**
+   ```bash
+   docker compose up -d --build
+   ```
+   Os serviços serão iniciados:
+   - `portfolio_frontend`: Porta 3000 (servido via Nginx com proxy reverso e headers de segurança)
+   - `portfolio_backend`: Porta 8000 (FastAPI em Python 3.13 com Uvicorn)
+   - `portfolio_postgres`: Porta 5432 (PostgreSQL 16 Alpine com volume persistente)
+   - `qdrant_data`: Volume persistente para a base vetorial do assistente RAG
 
-#### 1. Backend (FastAPI)
+3. **Configuração de Domínio e SSL (HTTPS):**
+   Aponte seu domínio para o servidor e configure o Certbot / Let's Encrypt ou utilize um reverse proxy externo (Traefik, Nginx Proxy Manager, Cloudflare) direcionando para `http://localhost:3000`.
+
+### Opção B: Deploy do Frontend na Vercel + Backend em Cloud
+
+- **Frontend (Vercel):** O projeto já inclui o arquivo `vercel.json` com roteamento SPA e suporte a edge functions. Conecte o repositório no dashboard da Vercel, defina a variável `VITE_BACKEND_API_URL` apontando para a URL pública do seu backend e execute o deploy.
+- **Backend (Railway, Render ou Fly.io):** Aponte o subdiretório `backend/`, adicione as variáveis de ambiente do `.env.example` e vincule um banco PostgreSQL gerenciado.
+
+---
+
+## 7. Execução Local para Desenvolvimento
+
+### 1. Backend (FastAPI)
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate   # ou .venv\Scripts\activate no Windows
 pip install -r requirements.txt
 
-# Executar suite de testes com TDD (15 testes unitários e de integração)
+# Executar suite completa de 35 testes unitários e de integração
 PYTHONPATH=. pytest -v
 
 # Iniciar servidor Uvicorn com hot-reload
 uvicorn app.presentation.main:app --reload --port 8000
 ```
 
-#### 2. Frontend (React + Vite)
+### 2. Frontend (React + Vite)
 ```bash
 # Na raiz do repositório:
 npm install
 
-# Compilar TypeScript estrito e validar o build
+# Compilar TypeScript estrito e validar o build de produção
 npm run build
 
 # Iniciar servidor Vite de desenvolvimento
 npm run dev
 ```
 
-Abra o navegador em `http://localhost:5173`.
+Abra o navegador em `http://localhost:5173`. A documentação interativa Swagger estará acessível em `http://localhost:8000/docs`.
 
 ---
 
