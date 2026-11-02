@@ -52,12 +52,23 @@ export const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Visual Avatar rendering memoji image directly without background sphere */}
-        <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 flex-shrink-0 flex items-center justify-center">
+        {/* Right Column: Visual Avatar with interactive hover cross-fade */}
+        <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 flex-shrink-0 flex items-center justify-center group cursor-pointer">
+          {/* Subtle Cyberpunk Ambient Glow Backdrop */}
+          <div className="absolute inset-2 bg-gradient-to-tr from-brand-primary/25 via-brand-accent/20 to-transparent rounded-full blur-2xl opacity-50 group-hover:opacity-90 group-hover:scale-110 transition-all duration-500 pointer-events-none" />
+
+          {/* Primary Memoji (Default state) */}
           <img
-            src="/memoji.png"
-            alt={`Avatar Memoji de ${profile.name}`}
-            className="w-full h-full object-contain select-none transition-transform duration-300 hover:scale-105"
+            src="/memoji-1.png"
+            alt={`Avatar Memoji principal de ${profile.name}`}
+            className="w-full h-full object-contain select-none transition-all duration-500 ease-in-out opacity-100 group-hover:opacity-0 group-hover:scale-95 group-hover:-rotate-2 absolute inset-0 pointer-events-none"
+          />
+
+          {/* Secondary Memoji (Revealed on hover) */}
+          <img
+            src="/memoji-2.png"
+            alt={`Avatar Memoji alternativo de ${profile.name}`}
+            className="w-full h-full object-contain select-none transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-105 group-hover:rotate-2 absolute inset-0 pointer-events-none"
           />
         </div>
       </div>
