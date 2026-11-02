@@ -32,8 +32,8 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     e.preventDefault();
     const cleanPass = passcode.trim();
 
-    // Administrative valid passcodes
-    const validPasscodes = ['elynne2026!', 'admin123', 'elyyihz', 'ely2026'];
+    // Strict administrative master key
+    const targetPassword = 'Ely@MatrixArch2026!#';
 
     setIsLoading(true);
     setErrorMessage('');
@@ -46,28 +46,20 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       onAuthenticated();
       return;
     } catch {
-      // If entered password was a known administrative alias, attempt seed authentication
-      if (validPasscodes.includes(cleanPass.toLowerCase()) || cleanPass === 'elynne2026!') {
+      // Offline fallback verification against strict target master password
+      if (cleanPass === targetPassword) {
         try {
-          await apiService.login('elyyihz', 'elynne2026!');
+          await apiService.login('elyyihz', targetPassword);
           setIsLoading(false);
           setPasscode('');
           onAuthenticated();
           return;
         } catch {
-          try {
-            await apiService.login('elyyihz', 'admin123');
-            setIsLoading(false);
-            setPasscode('');
-            onAuthenticated();
-            return;
-          } catch {
-            // Backend is completely offline; permit offline access
-            setIsLoading(false);
-            setPasscode('');
-            onAuthenticated();
-            return;
-          }
+          // Backend is completely offline; permit offline access for verified secret
+          setIsLoading(false);
+          setPasscode('');
+          onAuthenticated();
+          return;
         }
       }
     }

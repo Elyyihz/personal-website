@@ -1,91 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { SectionHeading } from '@/components/common/SectionHeading';
 import { BookOpenIcon, ExternalLinkIcon, SparklesIcon } from '@/components/icons';
-import { apiService } from '@/services/apiService';
-import { Logger } from '@/utils/logger';
-
-export interface NewsletterArticle {
-  id: string;
-  title: string;
-  link: string;
-  description: string;
-  pub_date: string;
-  author: string;
-  tags: string[];
-}
-
-/**
- * Curated fallback articles for Elyy.init newsletter when database is empty or offline.
- */
-const DEFAULT_ARTICLES: NewsletterArticle[] = [
-  {
-    id: 'art-1',
-    title: 'Construindo RAG Resiliente com LangGraph e Qdrant',
-    link: 'https://elyyihz.substack.com',
-    description:
-      'Uma análise profunda sobre roteamento multi-agente, chunking semântico e recuperação híbrida em grafos de decisão.',
-    pub_date: '2026-03-15T10:00:00Z',
-    author: 'Elynne Lima',
-    tags: ['GenAI', 'LangGraph', 'Qdrant', 'Python'],
-  },
-  {
-    id: 'art-2',
-    title: 'Clean Architecture na Prática: Desacoplando Domínio de Frameworks',
-    link: 'https://elyyihz.substack.com',
-    description:
-      'Como aplicar Ports & Adapters em projetos modernos, isolando regras de negócio de ORMs e APIs externas.',
-    pub_date: '2026-02-28T14:30:00Z',
-    author: 'Elynne Lima',
-    tags: ['Clean Architecture', 'DDD', 'Design Patterns'],
-  },
-  {
-    id: 'art-3',
-    title: 'Por que o Linux e Zsh Continuam Sendo a Base do Meu Workflow',
-    link: 'https://elyyihz.substack.com',
-    description:
-      'Reflexões sobre automação de ambientes, ergonomia de terminal, dotfiles versionados e eficiência no desenvolvimento.',
-    pub_date: '2026-01-20T09:00:00Z',
-    author: 'Elynne Lima',
-    tags: ['Linux', 'Terminal', 'Developer Experience'],
-  },
-];
+import { useData } from '@/context/DataContext';
 
 /**
  * Section component highlighting technical articles published in the Elyy.init newsletter.
- * Fetches dynamic syndicated articles with resilient curated fallbacks.
+ * Dynamically rendered from DataContext with visibility controls and custom URLs.
  */
 export const NewsletterSection: React.FC = () => {
-  const logger = new Logger('NewsletterSection');
-  const [articles, setArticles] = useState<NewsletterArticle[]>(DEFAULT_ARTICLES);
-  const [isLoading, setIsLoading] = useState(true);
+  const { articles } = useData();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchArticles = async () => {
-      try {
-        logger.logStepStart('FetchArticles', { source: 'backend_api' });
-        const data = await apiService.getNewsletterArticles();
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setArticles(data);
-          logger.logStepConclusion('FetchArticles', `Successfully loaded ${data.length} articles`);
-        }
-      } catch (err) {
-        logger.logDecision('FallbackCuratedArticles', 'Backend newsletter feed unavailable, using local articles');
-        logger.logError('Failed to fetch remote newsletter articles', err);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void fetchArticles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [logger]);
+  // Filter only articles marked as visible by the administrator
+  const visibleArticles = articles.filter((article) => article.visible !== false);
 
   const formatDate = (dateString: string): string => {
     try {
@@ -106,17 +32,16 @@ export const NewsletterSection: React.FC = () => {
         title="Alguns artigos da newsletter"
         badgeText="Elyy.init"
         icon={<BookOpenIcon className="w-7 h-7" />}
+        accessory={
+          <span className="text-xs font-mono text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-3 py-1.5 rounded-full">
+            {visibleArticles.length} {visibleArticles.length === 1 ? 'publicação' : 'publicações'}
+          </span>
+        }
       />
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="h-64 rounded-2xl bg-brand-surface/50 border border-brand-accent/10" />
-          ))}
-        </div>
-      ) : (
+      {visibleArticles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {articles.map((article) => (
+          {visibleArticles.map((article) => (
             <article
               key={article.id}
               className="group p-6 bg-brand-surface rounded-2xl border border-brand-accent/20 hover:border-brand-accent/60 transition-all flex flex-col justify-between hover:shadow-card-hover"
@@ -167,6 +92,13 @@ export const NewsletterSection: React.FC = () => {
               </div>
             </article>
           ))}
+        </div>
+      ) : (
+        <div className="py-12 text-center rounded-2xl bg-brand-surface border border-dashed border-brand-accent/20">
+          <BookOpenIcon className="w-10 h-10 text-brand-textMuted/50 mx-auto mb-3" />
+          <p className="text-brand-textMuted text-sm font-medium">
+            Nenhum artigo marcado como visível no momento.
+          </p>
         </div>
       )}
     </section>

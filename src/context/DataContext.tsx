@@ -4,11 +4,13 @@ import type { WishlistItem } from '@/types/wishlist';
 import type { ConsumedMedia } from '@/types/media';
 import type { HobbyItem } from '@/types/hobby';
 import type { ProfileInfo } from '@/types/profile';
+import type { ArticleItem } from '@/types/article';
 import { projectsData as initialProjects } from '@/data/projectsData';
 import { allWishlistData as initialWishlist } from '@/data/wishlistData';
 import { defaultConsumedMedia as initialMedia } from '@/data/mediaData';
 import { defaultHobbiesData as initialHobbies } from '@/data/interestsData';
 import { profileData as initialProfile } from '@/data/profileData';
+import { defaultArticlesData as initialArticles } from '@/data/articlesData';
 import { Logger } from '@/utils/logger';
 
 /**
@@ -25,6 +27,7 @@ export interface DataContextValue {
   wishlistItems: WishlistItem[];
   consumedMedia: ConsumedMedia;
   hobbies: HobbyItem[];
+  articles: ArticleItem[];
 
   // Profile management operations
   updateProfile: (updates: Partial<ProfileInfo>) => void;
@@ -46,6 +49,12 @@ export interface DataContextValue {
   createHobby: (hobby: Omit<HobbyItem, 'id'>) => void;
   updateHobby: (id: string, updates: Partial<HobbyItem>) => void;
   deleteHobby: (id: string) => void;
+
+  // Articles & Newsletter CRUD operations
+  createArticle: (article: Omit<ArticleItem, 'id'>) => void;
+  updateArticle: (id: string, updates: Partial<ArticleItem>) => void;
+  deleteArticle: (id: string) => void;
+  toggleArticleVisibility: (id: string) => void;
 
   // Utility reset action
   resetToDefaults: () => void;
@@ -120,6 +129,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return initialHobbies;
   });
 
+  const [articles, setArticles] = useState<ArticleItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_articles`);
+      if (saved) {
+        return JSON.parse(saved) as ArticleItem[];
+      }
+    } catch {
+      // Fallback on parse failure
+    }
+    return initialArticles;
+  });
+
   // Synchronize profile to localStorage
   useEffect(() => {
     try {
@@ -164,6 +185,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logger.logError('Failed to persist hobbies to localStorage', err);
     }
   }, [hobbies, logger]);
+
+  // Synchronize articles to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${STORAGE_KEY}_articles`, JSON.stringify(articles));
+    } catch (err) {
+      logger.logError('Failed to persist articles to localStorage', err);
+    }
+  }, [articles, logger]);
 
   // Project CRUD Actions
   const createProject = useCallback(
@@ -274,6 +304,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [logger]
   );
 
+  // Articles CRUD Actions
+  const createArticle = useCallback(
+    (newArticleData: Omit<ArticleItem, 'id'>) => {
+      logger.logStepStart('CreateArticle', { title: newArticleData.title });
+      const newId = `art-${Date.now()}`;
+      const article: ArticleItem = { ...newArticleData, id: newId, visible: newArticleData.visible ?? true };
+      setArticles((prev) => [article, ...prev]);
+      logger.logStepConclusion('CreateArticle', `Created article with id ${newId}`);
+    },
+    [logger]
+  );
+
+  const updateArticle = useCallback(
+    (id: string, updates: Partial<ArticleItem>) => {
+      logger.logStepStart('UpdateArticle', { id });
+      setArticles((prev) =>
+        prev.map((art) => (art.id === id ? { ...art, ...updates } : art))
+      );
+      logger.logStepConclusion('UpdateArticle', `Updated article ${id}`);
+    },
+    [logger]
+  );
+
+  const deleteArticle = useCallback(
+    (id: string) => {
+      logger.logStepStart('DeleteArticle', { id });
+      setArticles((prev) => prev.filter((art) => art.id !== id));
+      logger.logStepConclusion('DeleteArticle', `Deleted article ${id}`);
+    },
+    [logger]
+  );
+
+  const toggleArticleVisibility = useCallback(
+    (id: string) => {
+      logger.logStepStart('ToggleArticleVisibility', { id });
+      setArticles((prev) =>
+        prev.map((art) => (art.id === id ? { ...art, visible: art.visible === false ? true : false } : art))
+      );
+      logger.logStepConclusion('ToggleArticleVisibility', `Toggled visibility for ${id}`);
+    },
+    [logger]
+  );
+
   // Profile Management Action
   const updateProfile = useCallback(
     (updates: Partial<ProfileInfo>) => {
@@ -297,12 +370,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setWishlistItems(initialWishlist);
     setConsumedMedia(initialMedia);
     setHobbies(initialHobbies);
+    setArticles(initialArticles);
     try {
       localStorage.removeItem(`${STORAGE_KEY}_profile`);
       localStorage.removeItem(`${STORAGE_KEY}_projects`);
       localStorage.removeItem(`${STORAGE_KEY}_wishlist`);
       localStorage.removeItem(`${STORAGE_KEY}_media`);
       localStorage.removeItem(`${STORAGE_KEY}_hobbies`);
+      localStorage.removeItem(`${STORAGE_KEY}_articles`);
     } catch {
       // Ignored
     }
@@ -317,6 +392,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         wishlistItems,
         consumedMedia,
         hobbies,
+        articles,
         updateProfile,
         createProject,
         updateProject,
@@ -328,6 +404,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createHobby,
         updateHobby,
         deleteHobby,
+        createArticle,
+        updateArticle,
+        deleteArticle,
+        toggleArticleVisibility,
         resetToDefaults,
       }}
     >

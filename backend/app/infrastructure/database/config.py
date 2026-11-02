@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # Administrative Seed Credentials
     admin_default_username: str = "elyyihz"
-    admin_default_password: str = "elynne2026!"
+    admin_default_password: str = "Ely@MatrixArch2026!#"
 
     # Spotify OAuth Configurations
     spotify_client_id: str = ""
