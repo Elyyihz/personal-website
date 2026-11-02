@@ -19,6 +19,7 @@ interface WishlistFormData {
   category: WishlistCategory;
   url: string;
   tag: string;
+  isFulfilled: boolean;
 }
 
 const emptyFormData: WishlistFormData = {
@@ -27,6 +28,7 @@ const emptyFormData: WishlistFormData = {
   category: 'Livros',
   url: '',
   tag: '',
+  isFulfilled: false,
 };
 
 /**
@@ -43,6 +45,7 @@ export const WishlistManager: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'Todos' | WishlistCategory>('Todos');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const categories: Array<'Todos' | WishlistCategory> = [
     'Todos',
@@ -85,6 +88,7 @@ export const WishlistManager: React.FC = () => {
       category: item.category,
       url: item.url ?? '',
       tag: item.tag ?? '',
+      isFulfilled: Boolean(item.isFulfilled),
     });
     setIsFormOpen(true);
   };
@@ -100,22 +104,28 @@ export const WishlistManager: React.FC = () => {
       category: formData.category,
       url: formData.url.trim() || undefined,
       tag: formData.tag.trim() || undefined,
+      isFulfilled: formData.isFulfilled,
     };
 
     if (editingItemId) {
       updateWishlistItem(editingItemId, payload);
+      setFeedbackMessage('Item da wishlist salvo com sucesso!');
     } else {
       createWishlistItem(payload);
+      setFeedbackMessage('Item cadastrado na wishlist com sucesso!');
     }
 
     setIsFormOpen(false);
     setEditingItemId(null);
     setFormData(emptyFormData);
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   const handleDelete = (id: string) => {
     deleteWishlistItem(id);
     setDeleteConfirmId(null);
+    setFeedbackMessage('Item removido da wishlist com sucesso!');
+    setTimeout(() => setFeedbackMessage(null), 3500);
   };
 
   return (
@@ -135,10 +145,18 @@ export const WishlistManager: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-brand-primaryHover text-white rounded-xl text-xs font-semibold shadow-glow-blue transition-all"
           >
             <PlusIcon className="w-4 h-4" />
-            <span>Novo Item</span>
+            <span>Adicionar Item</span>
           </button>
         )}
       </div>
+
+      {/* Feedback Toast Notification */}
+      {feedbackMessage && (
+        <div className="p-3.5 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-xs text-emerald-300 font-semibold flex items-center gap-2 animate-fadeIn shadow-lg">
+          <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{feedbackMessage}</span>
+        </div>
+      )}
 
       {/* Item Form */}
       {isFormOpen && (
@@ -229,6 +247,19 @@ export const WishlistManager: React.FC = () => {
                 className="w-full px-3 py-2 bg-brand-surface rounded-xl border border-brand-accent/20 focus:border-brand-accent text-brand-heading text-xs focus:outline-none focus:ring-1 focus:ring-brand-accent"
               />
             </div>
+
+            <div className="md:col-span-2 flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="isFulfilledCheckbox"
+                checked={formData.isFulfilled}
+                onChange={(e) => setFormData({ ...formData, isFulfilled: e.target.checked })}
+                className="w-4 h-4 rounded text-brand-primary bg-brand-surface border-brand-accent/30 focus:ring-brand-accent"
+              />
+              <label htmlFor="isFulfilledCheckbox" className="text-xs font-medium text-brand-heading cursor-pointer">
+                Item já adquirido / realizado (is_fulfilled)
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-brand-accent/15">
@@ -283,8 +314,8 @@ export const WishlistManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Items Scrollable List */}
-      <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+      {/* Items List */}
+      <div className="space-y-2">
         {filteredItems.slice(0, 30).map((item) => {
           const isConfirming = deleteConfirmId === item.id;
 
@@ -309,6 +340,11 @@ export const WishlistManager: React.FC = () => {
                     <span className="text-[10px] font-mono text-brand-accent bg-brand-accent/10 px-1.5 py-0.2 rounded border border-brand-accent/20 flex-shrink-0">
                       {item.tag ?? item.category}
                     </span>
+                    {item.isFulfilled && (
+                      <span className="text-[9px] font-mono uppercase tracking-wider text-green-400 bg-green-500/10 border border-green-500/20 px-1.5 py-0.2 rounded flex-shrink-0">
+                        Adquirido
+                      </span>
+                    )}
                   </div>
                   {item.subtitle && (
                     <span className="text-[11px] text-brand-textMuted truncate block">
@@ -331,6 +367,18 @@ export const WishlistManager: React.FC = () => {
                     <ExternalLinkIcon className="w-3.5 h-3.5" />
                   </a>
                 )}
+                <button
+                  type="button"
+                  onClick={() => updateWishlistItem(item.id, { isFulfilled: !item.isFulfilled })}
+                  className={`p-1.5 rounded-lg border transition-colors ${
+                    item.isFulfilled
+                      ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                      : 'bg-brand-deep border-white/5 text-brand-textMuted hover:text-brand-accent'
+                  }`}
+                  title={item.isFulfilled ? 'Marcar como não adquirido' : 'Marcar como adquirido'}
+                >
+                  <CheckIcon className="w-3.5 h-3.5" />
+                </button>
                 <button
                   type="button"
                   onClick={() => handleOpenEdit(item)}

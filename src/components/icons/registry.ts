@@ -25,6 +25,7 @@ import {
   MailIcon,
   GiftIcon,
   ActivityIcon,
+  TerminalIcon,
 } from './index';
 import {
   PlusIcon,
@@ -152,6 +153,12 @@ export const ICON_REGISTRY: Record<string, RegisteredIcon> = {
     name: 'Activity / Pulse',
     category: 'tech',
     component: ActivityIcon,
+  },
+  terminal: {
+    id: 'terminal',
+    name: 'Terminal / Console',
+    category: 'tech',
+    component: TerminalIcon,
   },
   gift: {
     id: 'gift',

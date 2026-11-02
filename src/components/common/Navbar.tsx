@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { MailIcon, LockIcon } from '@/components/icons';
+import { MailIcon, TerminalIcon } from '@/components/icons';
 
 export interface NavbarProps {
   onOpenAdmin?: () => void;
+  onOpenTerminal?: () => void;
 }
 
 /**
  * Fixed top navigation bar with blur effect and semantic section anchors.
+ * Admin entrance is completely hidden from visible buttons, accessible solely via
+ * keyboard shortcut (Ctrl+Shift+A / Cmd+Shift+A) or confidential routing parameters.
  */
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenTerminal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -17,9 +20,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
 
   const navLinks = [
     { label: 'Sobre mim', href: '#sobre' },
-    { label: 'O Que Faço', href: '#projetos' },
     { label: 'Consumindo', href: '#consumindo' },
-    { label: 'Gostos', href: '#gostos' },
+    { label: 'O Que Faço', href: '#projetos' },
+    { label: 'Artigos', href: '#artigos' },
+    { label: 'Como Faço', href: '#how-i-work' },
     { label: 'Wishlist', href: '#wishlist' },
   ];
 
@@ -47,17 +51,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
           ))}
         </div>
 
-        {/* Right CTA and Admin Access Buttons */}
+        {/* Right CTA and Terminal Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          {onOpenAdmin && (
+          {onOpenTerminal && (
             <button
               type="button"
-              onClick={onOpenAdmin}
-              title="Acessar Painel Administrativo Privado"
-              className="p-2 rounded-lg text-brand-textMuted hover:text-brand-accent hover:bg-brand-surface border border-white/5 transition-all"
-              aria-label="Abrir Painel Administrativo"
+              onClick={onOpenTerminal}
+              title="Abrir Terminal macOS Zsh (Ctrl+` ou Cmd+`)"
+              className="p-2 rounded-lg text-brand-textMuted hover:text-cyan-400 hover:bg-brand-surface border border-white/5 transition-all font-mono"
+              aria-label="Abrir Terminal Zsh"
             >
-              <LockIcon className="w-4 h-4" />
+              <TerminalIcon className="w-4 h-4" />
             </button>
           )}
 
@@ -116,26 +120,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAdmin }) => {
             </a>
           ))}
           <div className="flex gap-2 pt-2">
-            {onOpenAdmin && (
+            {onOpenTerminal && (
               <button
                 type="button"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  onOpenAdmin();
+                  onOpenTerminal();
                 }}
-                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-textMuted hover:text-brand-accent bg-brand-deep border border-brand-accent/20 flex items-center justify-center gap-2"
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-textMuted hover:text-cyan-400 bg-brand-deep border border-brand-accent/20 flex items-center justify-center gap-2"
               >
-                <LockIcon className="w-3.5 h-3.5" />
-                <span>Painel</span>
+                <TerminalIcon className="w-3.5 h-3.5" />
+                <span>Terminal</span>
               </button>
             )}
             <a
               href="#contato"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white transition-all"
+              className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 text-center"
             >
-              <MailIcon className="w-3.5 h-3.5 text-currentColor" />
-              <span>Contato</span>
+              Contato
             </a>
           </div>
         </div>

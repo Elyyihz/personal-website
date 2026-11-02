@@ -40,3 +40,82 @@ body {
 .glass-card:hover {
   border-color: rgba(34, 211, 238, 0.4);
 }
+
+/* ==========================================================================
+   Cozy Mode: Earthy Warm Tones & Pixel Art Aesthetics (Stardew Valley Style)
+   ========================================================================== */
+.cozy-mode {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.cozy-mode,
+.cozy-mode body {
+  background-color: #1c1917 !important; /* Warm espresso / Stone 900 */
+  color: #e7e5e4 !important;
+}
+
+.cozy-mode .bg-brand-deep {
+  background-color: #181513 !important;
+}
+
+.cozy-mode .bg-brand-surface {
+  background-color: #292524 !important;
+}
+
+.cozy-mode .bg-brand-surfaceHover {
+  background-color: #3f3935 !important;
+}
+
+.cozy-mode .text-brand-accent,
+.cozy-mode .text-cyan-400,
+.cozy-mode .text-cyan-300 {
+  color: #f59e0b !important; /* Cozy Warm Amber */
+}
+
+.cozy-mode .text-brand-heading {
+  color: #fef3c7 !important; /* Warm Ivory/Parchment */
+}
+
+.cozy-mode .border-brand-accent\/10,
+.cozy-mode .border-brand-accent\/15,
+.cozy-mode .border-brand-accent\/20,
+.cozy-mode .border-brand-accent\/25,
+.cozy-mode .border-brand-accent\/40,
+.cozy-mode .border-brand-accent\/50,
+.cozy-mode .border-cyan-400\/20,
+.cozy-mode .border-cyan-400\/30,
+.cozy-mode .border-cyan-400\/40,
+.cozy-mode .border-cyan-400 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.cozy-mode .bg-brand-primary,
+.cozy-mode .bg-blue-600 {
+  background-color: #ea580c !important; /* Warm Terracotta */
+}
+
+.cozy-mode .shadow-glow-cyan,
+.cozy-mode .shadow-glow-blue {
+  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Pixel-art simulation for SVGs in Cozy Mode */
+.cozy-mode svg {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  shape-rendering: crispEdges;
+}
+
+/* White flag interactive wave animation */
+@keyframes flag-wave {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-16deg) scale(1.15); }
+  40% { transform: rotate(14deg) scale(1.15); }
+  60% { transform: rotate(-8deg) scale(1.05); }
+  80% { transform: rotate(6deg); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.animate-flag-wave {
+  animation: flag-wave 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}

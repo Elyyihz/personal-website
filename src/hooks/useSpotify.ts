@@ -1,74 +1,74 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { SpotifyState } from '@/types/spotify';
-import { SpotifyService } from '@/services/spotifyService';
+import { useState, useEffect, useCallback } from 'react';
+import type { SpotifyPlaybackDisplay } from '@/types/spotifyApi';
+import { spotifyOAuthManager, DEFAULT_FALLBACK_TRACK } from '@/services/spotifyOAuth';
 
 /**
  * Custom React hook managing Spotify playback integration and live timer tick.
- * Automatically switches between live API response and placeholder fallback.
- *
- * @returns Combined state object and refresh trigger.
+ * Supports background access token renewal and visually pleasing HTTP 204 fallback state.
  */
 export const useSpotify = () => {
-  const service = useMemo(() => new SpotifyService(), []);
-
-  const [state, setState] = useState<SpotifyState>({
-    track: null,
-    isLoading: true,
-    error: null,
-    isFallbackMock: false,
-  });
-
+  const [playback, setPlayback] = useState<SpotifyPlaybackDisplay>(DEFAULT_FALLBACK_TRACK);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [progressMs, setProgressMs] = useState<number>(0);
 
   /**
-   * Refreshes track information by invoking the underlying service.
+   * Refreshes playback status by querying Spotify Web API or backend proxy.
+   *
+   * @param isInitial - Whether this is the initial load (triggers spinner) or background poll.
    */
-  const loadTrack = useCallback(async () => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-    try {
-      const { track, isMock } = await service.getCurrentlyPlaying();
-      setState({
-        track,
-        isLoading: false,
-        error: null,
-        isFallbackMock: isMock,
-      });
-      setProgressMs(track.progressMs);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown playback error';
-      setState({
-        track: service.getMockTrack(),
-        isLoading: false,
-        error: errorMessage,
-        isFallbackMock: true,
-      });
+  const loadTrack = useCallback(async (isInitial = false) => {
+    if (isInitial) {
+      setIsLoading(true);
     }
-  }, [service]);
+    try {
+      const data = await spotifyOAuthManager.fetchCurrentlyPlaying();
+      setPlayback(data);
+      setProgressMs(data.progressMs);
+    } catch {
+      setPlayback(DEFAULT_FALLBACK_TRACK);
+    } finally {
+      if (isInitial) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    void loadTrack();
+    void loadTrack(true);
+    // Poll every 10 seconds for live updates
+    const pollInterval = setInterval(() => {
+      void loadTrack(false);
+    }, 10000);
+
+    return () => clearInterval(pollInterval);
   }, [loadTrack]);
 
   // Advances progress bar locally while the track is active
   useEffect(() => {
-    if (!state.track?.isPlaying) {
+    if (!playback.isPlaying) {
       return;
     }
 
     const interval = setInterval(() => {
       setProgressMs((current) => {
-        if (!state.track) return current;
         const next = current + 1000;
-        return next > state.track.durationMs ? 0 : next;
+        return next > playback.durationMs ? 0 : next;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [state.track]);
+  }, [playback.isPlaying, playback.durationMs]);
+
+  const loginWithSpotify = () => {
+    window.location.href = spotifyOAuthManager.getAuthorizationUrl();
+  };
 
   return {
-    ...state,
+    track: playback,
+    isLoading,
+    isIdle204: playback.isIdle204,
     progressMs,
     refreshTrack: loadTrack,
+    loginWithSpotify,
   };
 };

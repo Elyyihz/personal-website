@@ -24,4 +24,5 @@ export * from './LinkedinIcon';
 export * from './MailIcon';
 export * from './NavigationIcons';
 export * from './ActionIcons';
+export * from './WhiteFlagIcon';
 export * from './registry';
