@@ -30,7 +30,7 @@ class GeminiLLMGateway(LLMGatewayInterface):
     def __init__(
         self,
         api_key: str,
-        model_name: str = "gemini-2.5-flash",
+        model_name: str = "gemini-3.8-flash",
         embedding_model_name: str = "gemini-embedding-001",
     ) -> None:
         """Initializes Gemini client gateway with credentials and target models.
