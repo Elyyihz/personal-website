@@ -161,7 +161,8 @@ export class SpotifyOAuthManager {
   public async fetchCurrentlyPlaying(): Promise<SpotifyPlaybackDisplay> {
     // Check if backend API proxy is available first (FastAPI microservice)
     try {
-      const backendUrl = `${validatedEnv.backendApiUrl}/api/v1/spotify/currently-playing`;
+      const cleanBase = validatedEnv.backendApiUrl.replace(/\/api\/v1\/?$/, '');
+      const backendUrl = `${cleanBase}/api/v1/spotify/currently-playing`;
       const backendResp = await fetch(backendUrl, {
         headers: { Accept: 'application/json' },
       });

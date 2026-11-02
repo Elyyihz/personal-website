@@ -31,7 +31,7 @@ class GeminiLLMGateway(LLMGatewayInterface):
         self,
         api_key: str,
         model_name: str = "gemini-2.5-flash",
-        embedding_model_name: str = "text-embedding-004",
+        embedding_model_name: str = "gemini-embedding-001",
     ) -> None:
         """Initializes Gemini client gateway with credentials and target models.
 
@@ -90,6 +90,7 @@ class GeminiLLMGateway(LLMGatewayInterface):
                 response = await self.client.aio.models.embed_content(
                     model=self.embedding_model_name,
                     contents=text,
+                    config={"output_dimensionality": 768},
                 )
                 if response.embeddings and len(response.embeddings) > 0:
                     return response.embeddings[0].values
@@ -115,6 +116,7 @@ class GeminiLLMGateway(LLMGatewayInterface):
                 response = await self.client.aio.models.embed_content(
                     model=self.embedding_model_name,
                     contents=texts,
+                    config={"output_dimensionality": 768},
                 )
                 if response.embeddings and len(response.embeddings) == len(texts):
                     return [emb.values for emb in response.embeddings]
@@ -122,6 +124,29 @@ class GeminiLLMGateway(LLMGatewayInterface):
                 logger.warning("Remote batch embedding failed (%s); using deterministic vectors", exc)
 
         return [self._generate_deterministic_embedding(t) for t in texts]
+
+    def _extract_rag_context(self, prompt: str) -> Optional[str]:
+        """Extracts retrieved RAG knowledge excerpts from augmented user prompt.
+
+        Args:
+            prompt (str): Augmented prompt string.
+
+        Returns:
+            Optional[str]: Extracted context excerpts or None if absent.
+        """
+        if "Relevant Knowledge Context:\n" in prompt:
+            start_marker = "Relevant Knowledge Context:\n"
+            end_marker = "\n\nUser Question:"
+            start_pos = prompt.find(start_marker) + len(start_marker)
+            end_pos = prompt.find(end_marker)
+            if end_pos != -1:
+                body = prompt[start_pos:end_pos].strip()
+            else:
+                body = prompt[start_pos:].strip()
+
+            if body and "(No specific knowledge excerpts retrieved" not in body:
+                return body
+        return None
 
     async def generate_text(
         self,
@@ -163,6 +188,16 @@ class GeminiLLMGateway(LLMGatewayInterface):
                     return response.text.strip()
             except Exception as exc:
                 logger.error("Gemini generate_content call failed: %s", exc)
+
+        context_body = self._extract_rag_context(prompt)
+        if context_body:
+            return (
+                "Com base nos conhecimentos indexados no RAG do portfólio:\n\n"
+                f"{context_body}\n\n"
+                "[Nota técnica: Conteúdo recuperado diretamente da base vetorial Qdrant do RAG. "
+                "A API do Gemini retornou cota esgotada (HTTP 429). "
+                "Para ativar geração de texto natural na nuvem, configure uma chave do Google AI Studio (aistudio.google.com) no .env]"
+            )
 
         return (
             "Olá! Sou a assistente de IA oficial do portfólio de Elynne Lima. "
@@ -212,6 +247,18 @@ class GeminiLLMGateway(LLMGatewayInterface):
                 return
             except Exception as exc:
                 logger.error("Gemini stream generation failed: %s", exc)
+
+        context_body = self._extract_rag_context(prompt)
+        if context_body:
+            yield "Com base nos conhecimentos indexados no RAG do portfólio:\n\n"
+            for chunk_part in context_body.split("\n\n"):
+                yield chunk_part + "\n\n"
+            yield (
+                "\n[Nota técnica: Conteúdo recuperado diretamente da base vetorial Qdrant do RAG. "
+                "A API do Gemini retornou cota excedida (HTTP 429). "
+                "Para ativar geração de texto natural na nuvem, configure uma chave do Google AI Studio (aistudio.google.com) no .env]"
+            )
+            return
 
         # Fallback streamed response tokens
         fallback_tokens = [
