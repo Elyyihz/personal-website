@@ -244,20 +244,6 @@ export const MediaManager: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1">
-                Horas Jogadas
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                value={gamingForm.hoursPlayed}
-                onChange={(e) => setGamingForm({ ...gamingForm, hoursPlayed: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-brand-deep rounded-xl border border-brand-accent/20 focus:border-brand-accent text-brand-heading text-xs focus:outline-none focus:ring-1 focus:ring-brand-accent font-mono"
-              />
-            </div>
-
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold uppercase tracking-wider text-brand-text mb-1">
                 URL da Imagem / Artwork do Jogo

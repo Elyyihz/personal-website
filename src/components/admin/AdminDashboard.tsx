@@ -5,7 +5,6 @@ import {
   CodeIcon,
   GiftIcon,
   HeadphonesIcon,
-  HeartIcon,
   SparklesIcon,
   UserIcon,
   BookOpenIcon,
@@ -15,7 +14,6 @@ import { ProjectsManager } from './ProjectsManager';
 import { NewsletterManager } from './NewsletterManager';
 import { WishlistManager } from './WishlistManager';
 import { MediaManager } from './MediaManager';
-import { HobbiesManager } from './HobbiesManager';
 import { RAGIngestionManager } from './RAGIngestionManager';
 
 export interface AdminDashboardProps {
@@ -24,11 +22,11 @@ export interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'profile' | 'projects' | 'newsletter' | 'wishlist' | 'media' | 'hobbies' | 'rag';
+type AdminTab = 'profile' | 'projects' | 'newsletter' | 'wishlist' | 'media' | 'rag';
 
 /**
- * Admin Dashboard root modal component providing full CRUD for profile, projects, newsletter,
- * wishlist, and consumed media without any emojis.
+ * Admin Dashboard root modal component providing full CRUD for profile & hobbies,
+ * projects, newsletter, wishlist, consumed media, and RAG knowledge without any emojis.
  */
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   isOpen,
@@ -44,7 +42,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
     {
       id: 'profile',
-      label: 'Sobre Mim & Perfil',
+      label: 'Sobre Mim & Gostos',
       icon: <UserIcon className="w-4 h-4" />,
     },
     {
@@ -68,11 +66,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       icon: <HeadphonesIcon className="w-4 h-4" />,
     },
     {
-      id: 'hobbies',
-      label: 'Gostos & Hobbies',
-      icon: <HeartIcon className="w-4 h-4" />,
-    },
-    {
       id: 'rag',
       label: 'RAG & Assistente IA',
       icon: <SparklesIcon className="w-4 h-4" />,
@@ -80,12 +73,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-5xl h-[90vh] bg-brand-deep border border-brand-accent/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-5xl h-[90vh] max-h-[92vh] bg-brand-deep border border-brand-accent/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Top Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-brand-surface border-b border-brand-accent/20">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 bg-brand-surface border-b border-brand-accent/20 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-accent">
+            <div className="w-9 h-9 rounded-xl bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-accent shrink-0">
               <LockIcon className="w-5 h-5" />
             </div>
             <div>
@@ -95,14 +88,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   Autenticado
                 </span>
               </h3>
-              <p className="text-xs text-brand-textMuted">
+              <p className="text-xs text-brand-textMuted hidden sm:block">
                 Gerencie dinamicamente o catálogo e o estado visual da página principal.
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onLogout}
@@ -122,14 +115,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex gap-2 px-6 pt-3 bg-brand-surface/50 border-b border-brand-accent/15 overflow-x-auto">
+        {/* Navigation Tabs - with hidden scrollbars for clean UI */}
+        <div className="flex gap-2 px-4 sm:px-6 pt-3 bg-brand-surface/50 border-b border-brand-accent/15 overflow-x-auto no-scrollbar shrink-0">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 -mb-[1px] shrink-0 ${
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 -mb-[1px] shrink-0 whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-brand-accent text-brand-accent bg-brand-deep'
                   : 'border-transparent text-brand-textMuted hover:text-brand-text hover:bg-brand-surface'
@@ -142,13 +135,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Active Tab Panel Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {activeTab === 'profile' && <ProfileManager />}
           {activeTab === 'projects' && <ProjectsManager />}
           {activeTab === 'newsletter' && <NewsletterManager />}
           {activeTab === 'wishlist' && <WishlistManager />}
           {activeTab === 'media' && <MediaManager />}
-          {activeTab === 'hobbies' && <HobbiesManager />}
           {activeTab === 'rag' && <RAGIngestionManager />}
         </div>
       </div>

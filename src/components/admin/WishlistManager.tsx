@@ -314,8 +314,8 @@ export const WishlistManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Items Scrollable List */}
-      <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+      {/* Items List */}
+      <div className="space-y-2">
         {filteredItems.slice(0, 30).map((item) => {
           const isConfirming = deleteConfirmId === item.id;
 

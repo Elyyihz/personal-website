@@ -192,8 +192,8 @@ export const HobbiesManager: React.FC = () => {
         </form>
       )}
 
-      {/* Scrollable Hobbies Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto pr-1">
+      {/* Hobbies Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {hobbies.map((hobby) => {
           const IconComp = getRegisteredIcon(hobby.iconSlug);
           const isConfirming = deleteConfirmId === hobby.id;

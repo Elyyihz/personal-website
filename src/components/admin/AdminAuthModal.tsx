@@ -108,7 +108,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 setPasscode(e.target.value);
                 setErrorMessage('');
               }}
-              placeholder="Digite a senha (padrão: admin)"
+              placeholder="Digite a senha mestra de acesso..."
               className="w-full px-4 py-2.5 bg-brand-deep rounded-xl border border-brand-accent/20 focus:border-brand-accent text-brand-heading text-sm focus:outline-none focus:ring-1 focus:ring-brand-accent transition-all placeholder-brand-textMuted/40 font-mono"
             />
             {errorMessage && (
