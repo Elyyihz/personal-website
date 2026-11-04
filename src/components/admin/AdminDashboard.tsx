@@ -8,6 +8,7 @@ import {
   SparklesIcon,
   UserIcon,
   BookOpenIcon,
+  EyeIcon,
 } from '@/components/icons';
 import { ProfileManager } from './ProfileManager';
 import { ProjectsManager } from './ProjectsManager';
@@ -15,6 +16,7 @@ import { NewsletterManager } from './NewsletterManager';
 import { WishlistManager } from './WishlistManager';
 import { MediaManager } from './MediaManager';
 import { RAGIngestionManager } from './RAGIngestionManager';
+import { SectionsManager } from './SectionsManager';
 
 export interface AdminDashboardProps {
   isOpen: boolean;
@@ -22,7 +24,7 @@ export interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'profile' | 'projects' | 'newsletter' | 'wishlist' | 'media' | 'rag';
+type AdminTab = 'profile' | 'projects' | 'newsletter' | 'wishlist' | 'media' | 'rag' | 'sections';
 
 /**
  * Admin Dashboard root modal component providing full CRUD for profile & hobbies,
@@ -69,6 +71,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       id: 'rag',
       label: 'RAG & Assistente IA',
       icon: <SparklesIcon className="w-4 h-4" />,
+    },
+    {
+      id: 'sections',
+      label: 'Exibição de Seções',
+      icon: <EyeIcon className="w-4 h-4" />,
     },
   ];
 
@@ -142,6 +149,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {activeTab === 'wishlist' && <WishlistManager />}
           {activeTab === 'media' && <MediaManager />}
           {activeTab === 'rag' && <RAGIngestionManager />}
+          {activeTab === 'sections' && <SectionsManager />}
         </div>
       </div>
     </div>

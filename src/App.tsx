@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DataProvider } from '@/context/DataContext';
+import { DataProvider, useData } from '@/context/DataContext';
 import { Navbar } from '@/components/common/Navbar';
 import { Footer } from '@/components/common/Footer';
 import { HeroSection } from '@/components/sections/HeroSection';
@@ -15,6 +15,41 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { MacTerminal } from '@/components/terminal/MacTerminal';
 import { SpotifyCallbackHandler } from '@/components/common/SpotifyCallbackHandler';
 import { FloatingChatWidget } from '@/components/chat/FloatingChatWidget';
+
+/**
+ * Main layout sections filtered according to active SectionVisibility settings.
+ */
+const MainSections: React.FC = () => {
+  const { sectionVisibility } = useData();
+
+  return (
+    <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-8 md:space-y-12">
+      {/* 1. Hero & Apresentação */}
+      {sectionVisibility.hero && <HeroSection />}
+
+      {/* 2. Sobre mim (com Gostos & Hobbies integrados) */}
+      {sectionVisibility.about && <AboutMeSection />}
+
+      {/* 3. Consumindo (Currently Consuming / Live Telemetry) */}
+      {sectionVisibility.consuming && <CurrentlyConsumingSection />}
+
+      {/* 4. O que eu faço (Projetos & Skill Tree) */}
+      {sectionVisibility.projects && <WhatIDoSection />}
+
+      {/* 5. Alguns artigos da newsletter (Elyy.init) */}
+      {sectionVisibility.newsletter && <NewsletterSection />}
+
+      {/* 6. Como eu faço (How I Work: Clean Arch, DDD, Code Review) */}
+      {sectionVisibility.howIWork && <HowIWorkSection />}
+
+      {/* 7. Minha Wishlist */}
+      {sectionVisibility.wishlist && <WishlistSection />}
+
+      {/* 8. Contato */}
+      {sectionVisibility.contacts && <ContactsSection />}
+    </main>
+  );
+};
 
 /**
  * Root Application component assembling core semantic layout sections, private admin controls,
@@ -138,31 +173,7 @@ export const App: React.FC = () => {
         />
 
         {/* Main Semantic Layout */}
-        <main className="flex-1 max-w-6xl w-full mx-auto px-6 space-y-8 md:space-y-12">
-          {/* 1. Hero & Apresentação */}
-          <HeroSection />
-
-          {/* 2. Sobre mim (com Gostos & Hobbies integrados) */}
-          <AboutMeSection />
-
-          {/* 3. Consumindo (Currently Consuming / Live Telemetry) */}
-          <CurrentlyConsumingSection />
-
-          {/* 4. O que eu faço (Projetos & Skill Tree) */}
-          <WhatIDoSection />
-
-          {/* 5. Alguns artigos da newsletter (Elyy.init) */}
-          <NewsletterSection />
-
-          {/* 6. Como eu faço (How I Work: Clean Arch, DDD, Code Review) */}
-          <HowIWorkSection />
-
-          {/* 7. Minha Wishlist */}
-          <WishlistSection />
-
-          {/* 8. Contato */}
-          <ContactsSection />
-        </main>
+        <MainSections />
 
         {/* Semantic Footer */}
         <Footer

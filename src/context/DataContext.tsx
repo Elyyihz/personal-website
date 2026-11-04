@@ -5,6 +5,11 @@ import type { ConsumedMedia } from '@/types/media';
 import type { HobbyItem } from '@/types/hobby';
 import type { ProfileInfo } from '@/types/profile';
 import type { ArticleItem } from '@/types/article';
+import {
+  type SectionVisibility,
+  type SectionKey,
+  defaultSectionVisibility,
+} from '@/types/section';
 import { projectsData as initialProjects } from '@/data/projectsData';
 import { allWishlistData as initialWishlist } from '@/data/wishlistData';
 import { defaultConsumedMedia as initialMedia } from '@/data/mediaData';
@@ -28,6 +33,7 @@ export interface DataContextValue {
   consumedMedia: ConsumedMedia;
   hobbies: HobbyItem[];
   articles: ArticleItem[];
+  sectionVisibility: SectionVisibility;
 
   // Profile management operations
   updateProfile: (updates: Partial<ProfileInfo>) => void;
@@ -55,6 +61,10 @@ export interface DataContextValue {
   updateArticle: (id: string, updates: Partial<ArticleItem>) => void;
   deleteArticle: (id: string) => void;
   toggleArticleVisibility: (id: string) => void;
+
+  // Section Visibility operations
+  toggleSectionVisibility: (sectionId: SectionKey) => void;
+  updateSectionVisibility: (updates: Partial<SectionVisibility>) => void;
 
   // Utility reset action
   resetToDefaults: () => void;
@@ -141,6 +151,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return initialArticles;
   });
 
+  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>(() => {
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_section_visibility`);
+      if (saved) {
+        return {
+          ...defaultSectionVisibility,
+          ...JSON.parse(saved),
+        } as SectionVisibility;
+      }
+    } catch {
+      // Fallback on parse failure
+    }
+    return defaultSectionVisibility;
+  });
+
   // Synchronize profile to localStorage
   useEffect(() => {
     try {
@@ -194,6 +219,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logger.logError('Failed to persist articles to localStorage', err);
     }
   }, [articles, logger]);
+
+  // Synchronize section visibility to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`${STORAGE_KEY}_section_visibility`, JSON.stringify(sectionVisibility));
+    } catch (err) {
+      logger.logError('Failed to persist section visibility to localStorage', err);
+    }
+  }, [sectionVisibility, logger]);
 
   // Project CRUD Actions
   const createProject = useCallback(
@@ -347,6 +381,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [logger]
   );
 
+  // Section Visibility Actions
+  const toggleSectionVisibility = useCallback(
+    (sectionId: SectionKey) => {
+      logger.logStepStart('ToggleSectionVisibility', { sectionId });
+      setSectionVisibility((prev) => {
+        const next = !prev[sectionId];
+        logger.logStepConclusion('ToggleSectionVisibility', `Toggled ${sectionId} to ${next ? 'visible' : 'hidden'}`);
+        return {
+          ...prev,
+          [sectionId]: next,
+        };
+      });
+    },
+    [logger]
+  );
+
+  const updateSectionVisibility = useCallback(
+    (updates: Partial<SectionVisibility>) => {
+      logger.logStepStart('UpdateSectionVisibility', updates);
+      setSectionVisibility((prev) => ({
+        ...prev,
+        ...updates,
+      }));
+      logger.logStepConclusion('UpdateSectionVisibility', 'Batch updated section visibility');
+    },
+    [logger]
+  );
+
   // Profile Management Action
   const updateProfile = useCallback(
     (updates: Partial<ProfileInfo>) => {
@@ -371,6 +433,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setConsumedMedia(initialMedia);
     setHobbies(initialHobbies);
     setArticles(initialArticles);
+    setSectionVisibility(defaultSectionVisibility);
     try {
       localStorage.removeItem(`${STORAGE_KEY}_profile`);
       localStorage.removeItem(`${STORAGE_KEY}_projects`);
@@ -378,6 +441,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem(`${STORAGE_KEY}_media`);
       localStorage.removeItem(`${STORAGE_KEY}_hobbies`);
       localStorage.removeItem(`${STORAGE_KEY}_articles`);
+      localStorage.removeItem(`${STORAGE_KEY}_section_visibility`);
     } catch {
       // Ignored
     }
@@ -393,6 +457,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         consumedMedia,
         hobbies,
         articles,
+        sectionVisibility,
         updateProfile,
         createProject,
         updateProject,
@@ -408,6 +473,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateArticle,
         deleteArticle,
         toggleArticleVisibility,
+        toggleSectionVisibility,
+        updateSectionVisibility,
         resetToDefaults,
       }}
     >

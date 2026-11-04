@@ -11,6 +11,8 @@ import {
   ExternalLinkIcon,
   BookOpenIcon,
   GiftIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from '@/components/icons';
 
 interface WishlistFormData {
@@ -36,8 +38,14 @@ const emptyFormData: WishlistFormData = {
  * Enables adding, searching, editing, and deleting items across categories.
  */
 export const WishlistManager: React.FC = () => {
-  const { wishlistItems, createWishlistItem, updateWishlistItem, deleteWishlistItem } =
-    useData();
+  const {
+    wishlistItems,
+    createWishlistItem,
+    updateWishlistItem,
+    deleteWishlistItem,
+    sectionVisibility,
+    toggleSectionVisibility,
+  } = useData();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -148,6 +156,81 @@ export const WishlistManager: React.FC = () => {
             <span>Adicionar Item</span>
           </button>
         )}
+      </div>
+
+      {/* Section Visibility Status Banner */}
+      <div
+        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+          sectionVisibility.wishlist
+            ? 'bg-brand-surface/90 border-brand-accent/30'
+            : 'bg-amber-950/20 border-amber-500/30'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+              sectionVisibility.wishlist
+                ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+            }`}
+          >
+            {sectionVisibility.wishlist ? (
+              <EyeIcon className="w-4 h-4" />
+            ) : (
+              <EyeOffIcon className="w-4 h-4" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-brand-heading">
+                Exibição da Seção na Página Principal:
+              </span>
+              <span
+                className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border ${
+                  sectionVisibility.wishlist
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                }`}
+              >
+                {sectionVisibility.wishlist ? 'Visível no Site' : 'Oculta no Site'}
+              </span>
+            </div>
+            <p className="text-[11px] text-brand-textMuted mt-0.5">
+              {sectionVisibility.wishlist
+                ? 'A seção e seus itens estão acessíveis publicamente aos visitantes do portfólio.'
+                : 'A seção está oculta no site público. Todos os itens continuam salvos com segurança.'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const next = !sectionVisibility.wishlist;
+            toggleSectionVisibility('wishlist');
+            setFeedbackMessage(
+              `Seção de Wishlist ${next ? 'agora está visível' : 'ocultada com sucesso'} no site principal.`
+            );
+            setTimeout(() => setFeedbackMessage(null), 3500);
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-center gap-2 shrink-0 ${
+            sectionVisibility.wishlist
+              ? 'bg-brand-surfaceHover border-white/10 text-brand-text hover:text-amber-400 hover:border-amber-500/30'
+              : 'bg-brand-primary text-white border-brand-primary hover:bg-brand-primaryHover shadow-glow-blue'
+          }`}
+        >
+          {sectionVisibility.wishlist ? (
+            <>
+              <EyeOffIcon className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ocultar Seção</span>
+            </>
+          ) : (
+            <>
+              <EyeIcon className="w-3.5 h-3.5 text-white" />
+              <span>Exibir Seção</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Feedback Toast Notification */}

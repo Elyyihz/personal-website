@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { MailIcon, TerminalIcon } from '@/components/icons';
+import { useData } from '@/context/DataContext';
+import type { SectionKey } from '@/types/section';
 
 export interface NavbarProps {
   onOpenAdmin?: () => void;
@@ -8,24 +10,28 @@ export interface NavbarProps {
 
 /**
  * Fixed top navigation bar with blur effect and semantic section anchors.
+ * Dynamically hides links for sections toggled off in the administration panel.
  * Admin entrance is completely hidden from visible buttons, accessible solely via
  * keyboard shortcut (Ctrl+Shift+A / Cmd+Shift+A) or confidential routing parameters.
  */
 export const Navbar: React.FC<NavbarProps> = ({ onOpenTerminal }) => {
+  const { sectionVisibility } = useData();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
 
-  const navLinks = [
-    { label: 'Sobre mim', href: '#sobre' },
-    { label: 'Consumindo', href: '#consumindo' },
-    { label: 'O Que Faço', href: '#projetos' },
-    { label: 'Artigos', href: '#artigos' },
-    { label: 'Como Faço', href: '#how-i-work' },
-    { label: 'Wishlist', href: '#wishlist' },
+  const allNavLinks: Array<{ id: SectionKey; label: string; href: string }> = [
+    { id: 'about', label: 'Sobre mim', href: '#sobre' },
+    { id: 'consuming', label: 'Consumindo', href: '#consumindo' },
+    { id: 'projects', label: 'O Que Faço', href: '#projetos' },
+    { id: 'newsletter', label: 'Artigos', href: '#artigos' },
+    { id: 'howIWork', label: 'Como Faço', href: '#how-i-work' },
+    { id: 'wishlist', label: 'Wishlist', href: '#wishlist' },
   ];
+
+  const navLinks = allNavLinks.filter((link) => sectionVisibility[link.id]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-deep/85 backdrop-blur-md border-b border-brand-accent/15 transition-all">
@@ -65,13 +71,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTerminal }) => {
             </button>
           )}
 
-          <a
-            href="#contato"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-[0_0_15px_rgba(34,211,238,0.15)] hover:shadow-glow-blue"
-          >
-            <MailIcon className="w-4 h-4 text-currentColor" />
-            <span>Contato</span>
-          </a>
+          {sectionVisibility.contacts && (
+            <a
+              href="#contato"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-[0_0_15px_rgba(34,211,238,0.15)] hover:shadow-glow-blue"
+            >
+              <MailIcon className="w-4 h-4 text-currentColor" />
+              <span>Contato</span>
+            </a>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -133,13 +141,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTerminal }) => {
                 <span>Terminal</span>
               </button>
             )}
-            <a
-              href="#contato"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 text-center"
-            >
-              Contato
-            </a>
+            {sectionVisibility.contacts && (
+              <a
+                href="#contato"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex-1 py-2 px-3 rounded-lg text-xs font-semibold text-brand-accent bg-brand-accent/10 border border-brand-accent/30 text-center"
+              >
+                Contato
+              </a>
+            )}
           </div>
         </div>
       )}
